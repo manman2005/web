@@ -23,30 +23,32 @@ function AppContent() {
 
   return (
     <CartProvider>
-      {isAuthReady ? (
-        <Router>
-          <Navbar onSearch={setSearch} />
-          <div className="min-h-screen flex flex-col">
-            <main className="flex-grow">
-              <Routes>
-                <Route path="/" element={<Home search={search} />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/register" element={<Register />} />
-                <Route path="/logout" element={<Logout />} />
-                <Route path="/profile" element={<Profile />} />
-                <Route path="/dashboard" element={<Dashboard />} />
-                <Route path="/admin/dashboard" element={<AdminDashboard />} />
-                <Route path="/admin/add-product" element={<AddProduct />} />
-                <Route path="/cart" element={<Cart />} />
-                <Route path="/checkout" element={<Checkout />} />
-              </Routes>
-            </main>
-          </div>
-          <Footer />
-        </Router>
-      ) : (
-        <div className="flex justify-center items-center min-h-screen text-xl">Loading...</div>
-      )}
+      <Router> {/* Router is always rendered */}
+        {isAuthReady ? (
+          <>
+            <Navbar onSearch={setSearch} />
+            <div className="min-h-screen flex flex-col">
+              <main className="flex-grow">
+                <Routes>
+                  <Route path="/" element={<Home search={search} />} />
+                  <Route path="/login" element={<Login />} />
+                  <Route path="/register" element={<Register />} />
+                  <Route path="/logout" element={<Logout />} />
+                  <Route path="/profile" element={<Profile />} />
+                  <Route path="/dashboard" element={<Dashboard />} />
+                  <Route path="/admin/dashboard" element={<AdminDashboard />} />
+                  <Route path="/admin/add-product" element={<AddProduct />} />
+                  <Route path="/cart" element={<Cart />} />
+                  <Route path="/checkout" element={<Checkout />} />
+                </Routes>
+              </main>
+            </div>
+            <Footer />
+          </>
+        ) : (
+          <div className="flex justify-center items-center min-h-screen text-xl">Loading...</div>
+        )}
+      </Router>
     </CartProvider>
   );
 }
