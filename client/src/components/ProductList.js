@@ -35,13 +35,14 @@ const ProductList = ({ onSelectProduct, search }) => {
     : products;
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mt-8 px-6">
+    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2 p-2">
       {filtered.map((product) => (
         <div
           key={product._id}
-          className="bg-white rounded-xl shadow-md hover:shadow-xl transition-shadow cursor-pointer p-4 flex flex-col items-center border"
+          onClick={() => onSelectProduct(product)}
+          className="bg-white rounded-sm shadow-sm hover:shadow-md transition-shadow cursor-pointer flex flex-col overflow-hidden"
         >
-          <div onClick={() => onSelectProduct(product)} className="w-full flex flex-col items-center">
+          <div className="w-full aspect-square overflow-hidden">
             <img
               src={
                 product.images && product.images.length > 0
@@ -49,24 +50,29 @@ const ProductList = ({ onSelectProduct, search }) => {
                   : 'https://via.placeholder.com/200x200?text=No+Image'
               }
               alt={product.name}
-              className="w-40 h-40 object-cover rounded mb-3 bg-gray-50"
+              className="w-full h-full object-cover"
             />
-            <h4 className="text-base font-medium text-gray-800 min-h-[40px] mb-2 text-center">
+          </div>
+          <div className="p-2 flex flex-col flex-grow">
+            <h4 className="text-sm text-gray-800 mb-1 line-clamp-2 min-h-[40px]">
               {product.name}
             </h4>
-            <div className="text-orange-600 font-bold text-lg mb-2">
-              {product.price} บาท
+            <div className="text-orange-600 font-bold text-base mb-1">
+              ฿{product.price}
             </div>
-            <div className="flex justify-center items-center text-sm text-yellow-500 mb-2">
-              <FaStar className="mr-1" /> 4.9 | ขายแล้ว {product.sold || Math.floor(Math.random() * 1000)} ชิ้น
+            <div className="flex items-center text-xs text-gray-500 mt-auto">
+              <FaStar className="text-yellow-400 mr-1" /> 4.9 ({product.sold || Math.floor(Math.random() * 1000)} ขายแล้ว)
             </div>
+            <button
+              onClick={(e) => {
+                e.stopPropagation(); // Prevent card click from triggering
+                handleAddToCart(product);
+              }}
+              className="mt-2 w-full bg-orange-500 hover:bg-orange-600 text-white py-1.5 rounded-sm text-sm font-semibold shadow-sm"
+            >
+              เพิ่มลงตะกร้า
+            </button>
           </div>
-          <button
-            onClick={() => handleAddToCart(product)}
-            className="mt-2 w-full bg-orange-500 hover:bg-orange-600 text-white py-2 rounded font-semibold shadow"
-          >
-            เพิ่มลงตะกร้า
-          </button>
         </div>
       ))}
     </div>

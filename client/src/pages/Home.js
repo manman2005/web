@@ -1,33 +1,20 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
-import { Link } from 'react-router-dom';
+import React, { useState } from 'react';
+import Banner from '../components/Banner';
+import CategoryBar from '../components/CategoryBar';
+import ProductList from '../components/ProductList';
 
 const Home = () => {
-  const [products, setProducts] = useState([]);
-
-  useEffect(() => {
-    axios.get('/api/products') // ดึงสินค้าทั้งหมด
-      .then((res) => setProducts(res.data))
-      .catch((err) => console.error(err));
-  }, []);
+  const [searchQuery, setSearchQuery] = useState('');
 
   return (
-    <div className="p-6 max-w-6xl mx-auto">
-      <h1 className="text-3xl font-bold mb-6">ยินดีต้อนรับสู่ร้านค้าออนไลน์</h1>
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-        {products.map(product => (
-          <div key={product._id} className="bg-white rounded-xl shadow p-4">
-            <img src={product.image} alt={product.name} className="h-40 w-full object-cover rounded" />
-            <h2 className="text-lg font-semibold mt-2">{product.name}</h2>
-            <p className="text-green-600 mt-1">฿{product.price}</p>
-            <Link
-              to={`/products/${product._id}`}
-              className="mt-3 inline-block bg-blue-500 text-white px-4 py-1 rounded"
-            >
-              ดูรายละเอียด
-            </Link>
-          </div>
-        ))}
+    <div className="bg-gray-100 min-h-screen">
+      <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+        <Banner />
+        <CategoryBar />
+        <div className="mt-8">
+          <h2 className="text-2xl font-bold text-gray-800 mb-4 px-4 sm:px-0">สินค้าแนะนำ</h2>
+          <ProductList search={searchQuery} />
+        </div>
       </div>
     </div>
   );

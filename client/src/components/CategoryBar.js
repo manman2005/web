@@ -25,18 +25,18 @@ const categories = [
 ];
 
 const CategoryBar = () => (
-  <div className="bg-white rounded-xl shadow px-8 py-6 mb-8 mx-6">
+  <div className="bg-white rounded-xl shadow p-6 mb-8">
     <h3 className="text-lg font-semibold mb-4">หมวดหมู่</h3>
-    <div className="flex gap-8 overflow-x-auto pb-2">
+    <div className="grid grid-cols-5 md:grid-cols-10 gap-4">
       {categories.map((cat) => (
         <div
           key={cat.name}
-          className="flex flex-col items-center min-w-[100px] cursor-pointer hover:scale-105 transition-transform"
+          className="flex flex-col items-center cursor-pointer hover:scale-105 transition-transform p-2 rounded-lg hover:bg-gray-50"
         >
-          <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mb-2 overflow-hidden">
-            <img src={cat.img} alt={cat.name} className="w-12 h-12 object-contain" />
+          <div className="w-14 h-14 rounded-full bg-gray-100 flex items-center justify-center mb-1 overflow-hidden">
+            <img src={cat.img} alt={cat.name} className="w-10 h-10 object-contain" />
           </div>
-          <div className="text-xs text-center text-gray-700 font-medium">{cat.name}</div>
+          <div className="text-xs text-center text-gray-700 font-medium leading-tight">{cat.name}</div>
         </div>
       ))}
     </div>
