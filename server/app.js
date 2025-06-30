@@ -1,18 +1,13 @@
 const express = require('express');
-const mongoose = require('mongoose');
 const cors = require('cors');
+const connectDB = require('./Config/db');
 const app = express();
 
 app.use(cors({ allowedHeaders: ['Content-Type', 'Authorization'] }));
 app.use(express.json());
 
 // เชื่อมต่อ MongoDB
-mongoose.connect('mongodb://localhost:27017/roitai', {
-    useNewUrlParser: true,
-    useUnifiedTopology: true
-})
-.then(() => console.log('MongoDB connected'))
-.catch(err => console.log(err));
+connectDB();
 
 // import routes
 const productRoutes = require('./Routes/product');

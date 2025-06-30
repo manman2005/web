@@ -38,6 +38,20 @@ exports.getOrders = async (req, res) => {
     }
 };
 
+exports.getAllOrders = async (req, res) => {
+    try {
+        let orders = await Order.find({})
+            .populate('products.product')
+            .populate('orderBy', 'name') // Populate user name
+            .exec();
+
+        res.json(orders);
+    } catch (err) {
+        console.log(err);
+        res.status(500).send('Get All Orders Failed');
+    }
+};
+
 exports.updateOrderStatus = async (req, res) => {
     try {
         const { orderId, orderStatus } = req.body;
