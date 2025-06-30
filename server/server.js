@@ -7,8 +7,7 @@ const { readdirSync } = require('fs')
 const multer = require('multer');
 const path = require('path');
 
-//const productRouters= require('./Routes/product')
-//const authRouters=require('./Routes/auth')
+const orderRoutes = require('./Routes/order'); // Import order routes
 
 const app = express()
 
@@ -31,5 +30,6 @@ app.use('/uploads', express.static('uploads'));  // <-- ใช้ bodyParser ต
 //Route3
 app.use('/api/products', require('./Routes/product'));
 app.use('/api/auth', require('./Routes/auth'));
+app.use('/api', orderRoutes); // Use order routes
 
 app.listen(5000, () => console.log('Server is Runing  port 5000'))

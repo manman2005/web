@@ -18,14 +18,14 @@ const Navbar = ({ onSearch }) => {
 
   return (
     <nav className="flex items-center px-6 py-3 bg-orange-500 text-white justify-between shadow-md">
-      <div className="flex items-center flex-shrink-0">
+      <Link to="/" className="flex items-center flex-shrink-0 text-white no-underline">
         <img
           src="https://cdn.iconscout.com/icon/free/png-256/shopee-2296055-1911996.png"
           alt="Shopee"
           className="w-9 h-9 mr-2 bg-white rounded-lg"
         />
         <h2 className="m-0 font-bold tracking-wide text-xl">Shopee</h2>
-      </div>
+      </Link>
 
       <div className="flex-grow flex justify-center mx-8">
         <input

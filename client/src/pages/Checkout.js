@@ -17,7 +17,7 @@ const Checkout = () => {
     try {
       const token = getToken();
       const response = await axios.post(
-        'http://localhost:5000/api/order',
+        'http://localhost:5000/api/',
         {
           cart: cartItems.map(item => ({
             product: item._id,

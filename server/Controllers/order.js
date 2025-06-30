@@ -6,6 +6,10 @@ exports.createOrder = async (req, res) => {
         const { cart, cartTotal } = req.body;
         const user = await Users.findOne({ name: req.user.name }).exec();
 
+        if (!user) {
+            return res.status(400).send('User not found for order creation');
+        }
+
         let newOrder = await new Order({
             products: cart,
             cartTotal,
