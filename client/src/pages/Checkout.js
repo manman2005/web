@@ -1,12 +1,43 @@
 import React, { useContext } from 'react';
 import { CartContext } from '../context/CartContext';
+import { AuthContext } from '../context/AuthContext';
+import { getToken } from '../auth/authUtils';
+import axios from 'axios';
 
 const Checkout = () => {
-  const { cartItems, totalPrice } = useContext(CartContext);
+  const { cartItems, totalPrice, clearCart } = useContext(CartContext);
+  const { isAuthenticated } = useContext(AuthContext);
 
-  const handleCheckout = () => {
-    // เรียก API หรือ redirect ไปหน้าชำระเงิน
-    alert('สั่งซื้อเรียบร้อยแล้ว!');
+  const handleCheckout = async () => {
+    if (!isAuthenticated) {
+      alert('กรุณาเข้าสู่ระบบก่อนทำการสั่งซื้อ');
+      return;
+    }
+
+    try {
+      const token = getToken();
+      const response = await axios.post(
+        'http://localhost:5000/api/order',
+        {
+          cart: cartItems.map(item => ({
+            product: item._id,
+            count: item.quantity,
+            price: item.price
+          })),
+          cartTotal: totalPrice,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      alert('สั่งซื้อเรียบร้อยแล้ว!');
+      clearCart(); // Clear cart after successful order
+    } catch (error) {
+      console.error('Error during checkout:', error);
+      alert('เกิดข้อผิดพลาดในการสั่งซื้อ');
+    }
   };
 
   return (

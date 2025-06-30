@@ -44,8 +44,9 @@ const ProductList = ({ onSelectProduct, search }) => {
           <div onClick={() => onSelectProduct(product)} className="w-full flex flex-col items-center">
             <img
               src={
-                product.image ||
-                'https://via.placeholder.com/200x200?text=No+Image'
+                product.images && product.images.length > 0
+                  ? `http://localhost:5000${product.images[0].url}`
+                  : 'https://via.placeholder.com/200x200?text=No+Image'
               }
               alt={product.name}
               className="w-40 h-40 object-cover rounded mb-3 bg-gray-50"

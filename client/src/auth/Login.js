@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { saveToken } from './authUtils';
 import { AuthContext } from '../context/AuthContext';
+import { jwtDecode } from 'jwt-decode';
 
 const Login = () => {
   const [username, setUsername] = useState('');
@@ -21,7 +22,9 @@ const Login = () => {
 
       const { token } = response.data;
       saveToken(token);
-      login();
+      
+      const decoded = jwtDecode(token);
+      login(decoded.user);
       navigate('/');
     } catch (err) {
       alert(err.response?.data?.message || 'Login failed');

@@ -15,6 +15,9 @@ import Register from './auth/Register';
 import Logout from './auth/Logout';
 import Profile from './pages/Profile';
 import Dashboard from './pages/Dashboard';
+import AdminDashboard from './pages/AdminDashboard';
+import Checkout from './pages/Checkout';
+import AddProduct from './pages/AddProduct'; // Import AddProduct
 
 function App() {
   const [selectedProduct, setSelectedProduct] = useState(null);
@@ -43,7 +46,10 @@ function App() {
               <Route path="/logout" element={<Logout />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/admin/dashboard" element={<AdminDashboard />} />
+              <Route path="/admin/add-product" element={<AddProduct />} /> {/* Add new route for AddProduct */}
               <Route path="/cart" element={<Cart />} />
+              <Route path="/checkout" element={<Checkout />} />
             </Routes>
           </div>
           <Footer />

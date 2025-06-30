@@ -52,7 +52,8 @@ exports.login = async (req, res) => {
 
         const payload = {
             user: {
-                name: user.name
+                name: user.name,
+                role: user.role
             }
         };
 
@@ -63,6 +64,45 @@ exports.login = async (req, res) => {
         });
     } catch (err) {
         console.log(err);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
+exports.listUsers = async (req, res) => {
+    try {
+        const users = await Users.find({}).select('-password'); // Exclude password
+        res.json(users);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
+exports.updateUser = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { name, password, role } = req.body;
+
+        let updateData = { name, role };
+
+        if (password) {
+            const salt = await bcrypt.genSalt(10);
+            updateData.password = await bcrypt.hash(password, salt);
+        }
+
+        const user = await Users.findByIdAndUpdate(
+            id,
+            updateData,
+            { new: true }
+        ).select('-password'); // Exclude password from response
+
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        res.json(user);
+    } catch (err) {
+        console.error(err);
         res.status(500).json({ message: 'Server error' });
     }
 };

@@ -4,6 +4,8 @@ const cors = require('cors')
 const bodyParser = require('body-parser')
 const connectDB = require('./Config/db')
 const { readdirSync } = require('fs')
+const multer = require('multer');
+const path = require('path');
 
 //const productRouters= require('./Routes/product')
 //const authRouters=require('./Routes/auth')
@@ -14,7 +16,8 @@ connectDB()
 
 app.use(morgan('dev'))
 app.use(cors())
-app.use(bodyParser.json({ limit: '10mb' }))  // <-- ใช้ bodyParser ตรงนี้ ถูกต้องแล้ว
+app.use(bodyParser.json({ limit: '10mb' }))
+app.use('/uploads', express.static('uploads'));  // <-- ใช้ bodyParser ตรงนี้ ถูกต้องแล้ว
 
 //Route1
 //app.get('/product', (req,res) => {

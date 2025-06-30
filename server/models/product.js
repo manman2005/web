@@ -7,7 +7,12 @@ const productSchema =mongoose.Schema({
     },
     price: {
         type: Number
-    }
+    },
+    images: [
+        {
+            url: String,
+        },
+    ],
 }, {timestamps: true})
 
 module.exports = mongoose.model('products', productSchema)

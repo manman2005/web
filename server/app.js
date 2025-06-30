@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const app = express();
 
-app.use(cors());
+app.use(cors({ allowedHeaders: ['Content-Type', 'Authorization'] }));
 app.use(express.json());
 
 // เชื่อมต่อ MongoDB
@@ -17,13 +17,11 @@ mongoose.connect('mongodb://localhost:27017/roitai', {
 // import routes
 const productRoutes = require('./Routes/product');
 const authRoutes = require('./Routes/auth');
-// เพิ่ม routes อื่น ๆ เช่น cartRoutes, orderRoutes, userRoutes
+const orderRoutes = require('./Routes/order');
 
 // ใช้งาน routes
-app.use('/api/products', productRoutes);
-app.use('/api/auth', authRoutes);
-// app.use('/api/cart', cartRoutes);
-// app.use('/api/orders', orderRoutes);
-// app.use('/api/users', userRoutes);
+app.use('/api', productRoutes);
+app.use('/api', authRoutes);
+app.use('/api', orderRoutes);
 
 app.listen(5000, () => console.log('Server running on port 5000'));

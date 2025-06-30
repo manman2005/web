@@ -6,7 +6,7 @@ import { CartContext } from '../context/CartContext';
 import { clearToken } from '../auth/authUtils';
 
 const Navbar = ({ onSearch }) => {
-  const { isAuthenticated, logout } = useContext(AuthContext);
+  const { isAuthenticated, user, logout } = useContext(AuthContext);
   const { cartItems } = useContext(CartContext);
 
   const handleLogout = () => {
@@ -37,6 +37,14 @@ const Navbar = ({ onSearch }) => {
       <div className="flex items-center gap-4">
         {isAuthenticated ? (
           <>
+            {user && user.role === 'admin' && (
+              <Link
+                to="/admin/dashboard"
+                className="text-white no-underline flex items-center text-base hover:text-orange-100 transition-colors"
+              >
+                Admin Dashboard
+              </Link>
+            )}
             <Link
               to="/profile"
               className="text-white no-underline flex items-center text-base hover:text-orange-100 transition-colors"

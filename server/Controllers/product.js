@@ -30,21 +30,46 @@ exports.list = async (req, res) => {
 }
 exports.create = async (req, res) => {
   try {
-    console.log(req.body); // ตรวจสอบข้อมูลที่ส่งมา
-    const producted = await new product(req.body).save()
-    res.json(producted); // ส่งข้อมูลกลับไปให้ client ดูเลย
+    const { name, detail, price, category, brand } = req.body;
+    let images = [];
+
+    if (req.files && req.files.length > 0) {
+      images = req.files.map(file => ({ url: `/uploads/${file.filename}` }));
+    }
+
+    const newProduct = new product({
+      name,
+      detail,
+      price,
+      category,
+      brand,
+      images,
+    });
+
+    const savedProduct = await newProduct.save();
+    res.json(savedProduct);
   } catch (err) {
-    console.log(err)
-    res.status(500).send('server error')
+    console.error(err);
+    res.status(500).send('Server error');
   }
 }
 
 exports.update = async (req, res) => {
     try {
         const id = req.params.id;
-        const updatedProduct = await product.findByIdAndUpdate(id, req.body, {
-            new: true,        // ให้ส่งค่าที่อัปเดตกลับ
-            runValidators: true // ตรวจสอบตาม schema
+        const { name, detail, price, category, brand } = req.body;
+        let updateData = { name, detail, price, category, brand };
+
+        if (req.files && req.files.length > 0) {
+            const newImages = req.files.map(file => ({ url: `/uploads/${file.filename}` }));
+            // For simplicity, replacing existing images with new ones. 
+            // A more robust solution might merge or allow specific image deletion.
+            updateData.images = newImages;
+        }
+
+        const updatedProduct = await product.findByIdAndUpdate(id, updateData, {
+            new: true,
+            runValidators: true
         }).exec();
 
         if (!updatedProduct) {
@@ -53,7 +78,7 @@ exports.update = async (req, res) => {
 
         res.json(updatedProduct);
     } catch (err) {
-        console.log(err);
+        console.error(err);
         res.status(500).send('server error');
     }
 }
