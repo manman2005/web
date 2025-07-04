@@ -13,7 +13,6 @@ import Profile from './pages/Profile';
 import Dashboard from './pages/Dashboard';
 import AdminDashboard from './pages/AdminDashboard';
 import Checkout from './pages/Checkout';
-import AddProduct from './pages/AddProduct';
 import Cart from './components/Cart';
 import Home from './pages/Home';
 import ProductDetail from './components/ProductDetail';
@@ -38,7 +37,6 @@ const AppContent = () => {
                   <Route path="/profile" element={<Profile />} />
                   <Route path="/dashboard" element={<Dashboard />} />
                   <Route path="/admin/dashboard" element={<AdminDashboard />} />
-                  <Route path="/admin/add-product" element={<AddProduct />} />
                   <Route path="/cart" element={<Cart />} />
                   <Route path="/products/:id" element={<ProductDetail />} />
                   <Route path="/checkout" element={<Checkout />} />
