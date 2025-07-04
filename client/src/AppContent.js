@@ -16,8 +16,9 @@ import Checkout from './pages/Checkout';
 import AddProduct from './pages/AddProduct';
 import Cart from './components/Cart';
 import Home from './pages/Home';
+import ProductDetail from './components/ProductDetail';
 
-function AppContent() {
+const AppContent = () => {
   const [search, setSearch] = useState('');
   const { isAuthReady } = useContext(AuthContext);
 
@@ -39,6 +40,7 @@ function AppContent() {
                   <Route path="/admin/dashboard" element={<AdminDashboard />} />
                   <Route path="/admin/add-product" element={<AddProduct />} />
                   <Route path="/cart" element={<Cart />} />
+                  <Route path="/products/:id" element={<ProductDetail />} />
                   <Route path="/checkout" element={<Checkout />} />
                 </Routes>
               </main>

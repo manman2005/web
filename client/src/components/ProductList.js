@@ -39,7 +39,7 @@ const ProductList = ({ onSelectProduct, search }) => {
       {filtered.map((product) => (
         <div
           key={product._id}
-          onClick={() => onSelectProduct(product)}
+          onClick={() => navigate(`/products/${product._id}`)}
           className="bg-white rounded-sm shadow-sm hover:shadow-md transition-shadow cursor-pointer flex flex-col overflow-hidden"
         >
           <div className="w-full aspect-square overflow-hidden">

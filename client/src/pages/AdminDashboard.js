@@ -13,6 +13,14 @@ const AdminDashboard = () => {
   const [editingProduct, setEditingProduct] = useState(null);
   const [productForm, setProductForm] = useState({ name: '', price: 0, quantity: 0, description: '', category: '', brand: '', images: [] });
   const [selectedFiles, setSelectedFiles] = useState([]);
+  const [userSearch, setUserSearch] = useState('');
+  const [productSearch, setProductSearch] = useState('');
+  const [orderSearch, setOrderSearch] = useState('');
+  const [addingProduct, setAddingProduct] = useState(false);
+  const [addProductForm, setAddProductForm] = useState({
+    name: '', price: 0, quantity: 0, description: '', category: '', brand: '', images: []
+  });
+  const [addSelectedFiles, setAddSelectedFiles] = useState([]);
 
   useEffect(() => {
     fetchOrders();
@@ -167,6 +175,43 @@ const AdminDashboard = () => {
     }
   };
 
+  const handleAddProductFormChange = (e) => {
+    const { name, value } = e.target;
+    setAddProductForm({ ...addProductForm, [name]: value });
+  };
+
+  const handleAddImageChange = (e) => {
+    setAddSelectedFiles(Array.from(e.target.files));
+  };
+
+  const handleAddProduct = async (e) => {
+    e.preventDefault();
+    try {
+      const token = getToken();
+      const formData = new FormData();
+      for (const key in addProductForm) {
+        if (key !== 'images') {
+          formData.append(key, addProductForm[key]);
+        }
+      }
+      addSelectedFiles.forEach((file) => {
+        formData.append('images', file);
+      });
+      await axios.post('http://localhost:5000/api/products', formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      setAddingProduct(false);
+      setAddProductForm({ name: '', price: 0, quantity: 0, description: '', category: '', brand: '', images: [] });
+      setAddSelectedFiles([]);
+      fetchProducts();
+    } catch (error) {
+      console.error('Error adding product:', error);
+    }
+  };
+
   const getStatusBadge = (status) => {
     switch (status) {
       case 'Processing':
@@ -185,18 +230,20 @@ const AdminDashboard = () => {
       <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold text-gray-800">Admin Dashboard</h1>
-          <Link
-            to="/admin/add-product"
-            className="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition-transform transform hover:scale-105"
-          >
-            <FiPlusCircle />
-            Add New Product
-          </Link>
         </div>
 
         {/* Users Section */}
         <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
-          <h2 className="text-2xl font-semibold text-gray-700 mb-4 flex items-center gap-3"><FiUsers /> All Users</h2>
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-2xl font-semibold text-gray-700 flex items-center gap-3"><FiUsers /> All Users</h2>
+            <input
+              type="text"
+              placeholder="Search users..."
+              value={userSearch}
+              onChange={(e) => setUserSearch(e.target.value)}
+              className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            />
+          </div>
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
@@ -207,7 +254,11 @@ const AdminDashboard = () => {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {users.map((user) => (
+                {users
+                  .filter((user) =>
+                    user.name.toLowerCase().includes(userSearch.toLowerCase())
+                  )
+                  .map((user) => (
                   <tr key={user._id}>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{user.name}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -229,7 +280,26 @@ const AdminDashboard = () => {
 
         {/* Products Section */}
         <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
-          <h2 className="text-2xl font-semibold text-gray-700 mb-4 flex items-center gap-3"><FiBox /> All Products</h2>
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-2xl font-semibold text-gray-700 flex items-center gap-3"><FiBox /> All Products</h2>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                placeholder="Search products..."
+                value={productSearch}
+                onChange={(e) => setProductSearch(e.target.value)}
+                className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              />
+              <Link
+                to="#"
+                onClick={() => setAddingProduct(true)}
+                className="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition-transform transform hover:scale-105"
+              >
+                <FiPlusCircle />
+                Add New Product
+              </Link>
+            </div>
+          </div>
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
@@ -241,7 +311,11 @@ const AdminDashboard = () => {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {products.map((product) => (
+                {products
+                  .filter((product) =>
+                    product.name.toLowerCase().includes(productSearch.toLowerCase())
+                  )
+                  .map((product) => (
                   <tr key={product._id}>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{product.name}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">฿{product.price}</td>
@@ -263,24 +337,37 @@ const AdminDashboard = () => {
 
         {/* Orders Section */}
         <div className="bg-white rounded-lg shadow-lg p-6">
-          <h2 className="text-2xl font-semibold text-gray-700 mb-4 flex items-center gap-3"><FiShoppingCart /> All Orders</h2>
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-2xl font-semibold text-gray-700 flex items-center gap-3"><FiShoppingCart /> รายการสั่งซื้อทั้งหมด</h2>
+            <input
+              type="text"
+              placeholder="Search orders by ID..."
+              value={orderSearch}
+              onChange={(e) => setOrderSearch(e.target.value)}
+              className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            />
+          </div>
           <div className="space-y-6">
-            {orders.map((order) => (
+            {orders
+              .filter((order) =>
+                order._id.toLowerCase().includes(orderSearch.toLowerCase())
+              )
+              .map((order) => (
               <div key={order._id} className="bg-gray-50 rounded-lg p-4 border border-gray-200">
                 <div className="flex flex-wrap justify-between items-start mb-2">
                   <div>
-                    <p className="font-semibold text-gray-800">Order ID: <span className="font-normal text-gray-600">{order._id}</span></p>
-                    <p className="font-semibold text-gray-800">Customer: <span className="font-normal text-gray-600">{order.orderBy?.name || 'N/A'}</span></p>
+                    <p className="font-semibold text-gray-800">รหัสคำสั่งซื้อ: <span className="font-normal text-gray-600">{order._id}</span></p>
+                    <p className="font-semibold text-gray-800">ชื่อลูกค้า: <span className="font-normal text-gray-600">{order.orderBy?.name || 'N/A'}</span></p>
                   </div>
                   <div className="text-right">
-                    <p className="font-semibold text-gray-800">Total: <span className="font-bold text-indigo-600">฿{order.cartTotal}</span></p>
+                    <p className="font-semibold text-gray-800">ราคารวม: <span className="font-bold text-indigo-600">฿{order.cartTotal}</span></p>
                     <span className={`text-sm font-medium mr-2 px-2.5 py-0.5 rounded ${getStatusBadge(order.orderstatus)}`}>
                       {order.orderstatus}
                     </span>
                   </div>
                 </div>
                 <div className="mt-4">
-                  <p className="font-semibold text-gray-700 mb-2">Products:</p>
+                  <p className="font-semibold text-gray-700 mb-2">รายการสินค้า:</p>
                   <ul className="list-disc list-inside space-y-1 text-sm text-gray-600">
                     {order.products.map((item) => (
                       <li key={item._id}>
@@ -290,17 +377,17 @@ const AdminDashboard = () => {
                   </ul>
                 </div>
                 <div className="mt-4">
-                  <label htmlFor={`status-${order._id}`} className="block text-sm font-medium text-gray-700 mb-1">Update Status:</label>
+                  <label htmlFor={`status-${order._id}`} className="block text-sm font-medium text-gray-700 mb-1">อัพเดทสถานะ:</label>
                   <select
                     id={`status-${order._id}`}
                     value={order.orderstatus}
                     onChange={(e) => handleStatusChange(order._id, e.target.value)}
                     className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
                   >
-                    <option>Not Processed</option>
-                    <option>Processing</option>
-                    <option>Cancelled</option>
-                    <option>Completed</option>
+                    <option>ยังไม่ดำเนินการ</option>
+                    <option>กำลังดำเนินการ</option>
+                    <option>ยกเลิก</option>
+                    <option>เสร็จสมบูรณ์</option>
                   </select>
                 </div>
               </div>
@@ -369,7 +456,7 @@ const AdminDashboard = () => {
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-center p-4">
           <div className="bg-white p-8 rounded-lg shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-6">
-              <h3 className="text-2xl font-bold text-gray-800">Edit Product</h3>
+              <h3 className="text-2xl font-bold text-gray-800">แก้ไขสินค้า</h3>
               <button onClick={() => setEditingProduct(null)} className="text-gray-400 hover:text-gray-600">
                 <FiXCircle size={24} />
               </button>
@@ -377,7 +464,7 @@ const AdminDashboard = () => {
             <form onSubmit={handleUpdateProduct}>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                 <div>
-                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="productName">Name</label>
+                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="productName">ชื่อสินค้า</label>
                   <input
                     type="text"
                     id="productName"
@@ -388,7 +475,7 @@ const AdminDashboard = () => {
                   />
                 </div>
                 <div>
-                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="productPrice">Price</label>
+                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="productPrice">ราคา</label>
                   <input
                     type="number"
                     id="productPrice"
@@ -399,7 +486,7 @@ const AdminDashboard = () => {
                   />
                 </div>
                 <div>
-                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="productQuantity">Quantity</label>
+                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="productQuantity">จำนวน</label>
                   <input
                     type="number"
                     id="productQuantity"
@@ -410,7 +497,7 @@ const AdminDashboard = () => {
                   />
                 </div>
                 <div>
-                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="productCategory">Category</label>
+                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="productCategory">หมวดหมู่</label>
                   <input
                     type="text"
                     id="productCategory"
@@ -421,7 +508,7 @@ const AdminDashboard = () => {
                   />
                 </div>
                 <div>
-                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="productBrand">Brand</label>
+                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="productBrand">แบรนด์</label>
                   <input
                     type="text"
                     id="productBrand"
@@ -433,7 +520,7 @@ const AdminDashboard = () => {
                 </div>
               </div>
               <div className="mb-4">
-                <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="productDescription">Description</label>
+                <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="productDescription">รายละเอียด</label>
                 <textarea
                   id="productDescription"
                   name="description"
@@ -444,7 +531,7 @@ const AdminDashboard = () => {
                 ></textarea>
               </div>
               <div className="mb-4">
-                <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="productImages">Product Images</label>
+                <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="productImages">รูปภาพสินค้า</label>
                 <input
                   type="file"
                   id="productImages"
@@ -457,7 +544,7 @@ const AdminDashboard = () => {
               {/* Image handling can be more complex, for now, just display if any */}
               {productForm.images && productForm.images.length > 0 && (
                 <div className="mb-4">
-                  <label className="block text-gray-700 text-sm font-bold mb-2">Current Images:</label>
+                  <label className="block text-gray-700 text-sm font-bold mb-2">รูปภาพปัจจุบัน:</label>
                   <div className="flex flex-wrap gap-2">
                     {productForm.images.map((img, index) => (
                       <img key={index} src={`http://localhost:5000${img.url}`} alt={`Product Image ${index + 1}`} className="w-20 h-20 object-cover rounded-md" />
@@ -471,13 +558,123 @@ const AdminDashboard = () => {
                   onClick={() => setEditingProduct(null)}
                   className="py-2 px-4 bg-gray-200 text-gray-800 font-semibold rounded-lg hover:bg-gray-300"
                 >
-                  Cancel
+                  ยกเลิก
                 </button>
                 <button
                   type="submit"
                   className="py-2 px-4 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700"
                 >
-                  Update Product
+                  อัพเดทสินค้า
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Add Product Modal */}
+      {addingProduct && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-center p-4">
+          <div className="bg-white p-8 rounded-lg shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-2xl font-bold text-gray-800">เพิ่มสินค้าใหม่</h3>
+              <button onClick={() => setAddingProduct(false)} className="text-gray-400 hover:text-gray-600">
+                <FiXCircle size={24} />
+              </button>
+            </div>
+            <form onSubmit={handleAddProduct}>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div>
+                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="productName">ชื่อสินค้า</label>
+                  <input
+                    type="text"
+                    id="productName"
+                    name="name"
+                    value={addProductForm.name}
+                    onChange={handleAddProductFormChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="productPrice">ราคา</label>
+                  <input
+                    type="number"
+                    id="productPrice"
+                    name="price"
+                    value={addProductForm.price}
+                    onChange={handleAddProductFormChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="productQuantity">จำนวน</label>
+                  <input
+                    type="number"
+                    id="productQuantity"
+                    name="quantity"
+                    value={addProductForm.quantity}
+                    onChange={handleAddProductFormChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="productCategory">หมวดหมู่</label>
+                  <input
+                    type="text"
+                    id="productCategory"
+                    name="category"
+                    value={addProductForm.category}
+                    onChange={handleAddProductFormChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="productBrand">แบรนด์</label>
+                  <input
+                    type="text"
+                    id="productBrand"
+                    name="brand"
+                    value={addProductForm.brand}
+                    onChange={handleAddProductFormChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  />
+                </div>
+              </div>
+              <div className="mb-4">
+                <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="productDescription">รายละเอียด</label>
+                <textarea
+                  id="productDescription"
+                  name="description"
+                  value={addProductForm.description}
+                  onChange={handleAddProductFormChange}
+                  rows="3"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                ></textarea>
+              </div>
+              <div className="mb-4">
+                <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="productImages">รูปภาพสินค้า</label>
+                <input
+                  type="file"
+                  id="productImages"
+                  name="images"
+                  multiple
+                  onChange={handleAddImageChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+              </div>
+              <div className="flex justify-end gap-4">
+                <button
+                  type="button"
+                  onClick={() => setAddingProduct(false)}
+                  className="py-2 px-4 bg-gray-200 text-gray-800 font-semibold rounded-lg hover:bg-gray-300"
+                >
+                  ยกเลิก
+                </button>
+                <button
+                  type="submit"
+                  className="py-2 px-4 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700"
+                >
+                  เพิ่มสินค้า
                 </button>
               </div>
             </form>
