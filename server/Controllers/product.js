@@ -30,7 +30,7 @@ exports.list = async (req, res) => {
 }
 exports.create = async (req, res) => {
   try {
-    const { name, detail, price, category, brand } = req.body;
+    const { name, detail, price, category, brand, quantity } = req.body; // เพิ่ม quantity
     let images = [];
 
     if (req.files && req.files.length > 0) {
@@ -43,6 +43,7 @@ exports.create = async (req, res) => {
       price,
       category,
       brand,
+      quantity, // เพิ่ม quantity
       images,
     });
 
@@ -57,13 +58,11 @@ exports.create = async (req, res) => {
 exports.update = async (req, res) => {
     try {
         const id = req.params.id;
-        const { name, detail, price, category, brand } = req.body;
-        let updateData = { name, detail, price, category, brand };
+        const { name, detail, price, category, brand, quantity } = req.body; // เพิ่ม quantity
+        let updateData = { name, detail, price, category, brand, quantity }; // เพิ่ม quantity
 
         if (req.files && req.files.length > 0) {
             const newImages = req.files.map(file => ({ url: `/uploads/${file.filename}` }));
-            // For simplicity, replacing existing images with new ones. 
-            // A more robust solution might merge or allow specific image deletion.
             updateData.images = newImages;
         }
 
