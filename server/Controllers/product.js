@@ -21,11 +21,18 @@ exports.read = async (req, res) => {
 
 exports.list = async (req, res) => {
     try {
-        const producted = await product.find({}).exec();
-        res.json(producted) // ส่งข้อมูลสินค้าออกไป
+        const { search } = req.query;
+        let query = {};
+
+        if (search) {
+            query.name = { $regex: search, $options: 'i' };
+        }
+
+        const products = await product.find(query).exec();
+        res.json(products);
     } catch (err) {
-        console.log(err)
-        res.status(500).send('server error')
+        console.log(err);
+        res.status(500).send('server error');
     }
 }
 exports.create = async (req, res) => {

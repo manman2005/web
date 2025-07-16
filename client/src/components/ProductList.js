@@ -7,16 +7,39 @@ import { AuthContext } from '../context/AuthContext';
 
 const ProductList = ({ onSelectProduct, search }) => {
   const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const { addToCart } = useContext(CartContext);
   const { isAuthenticated } = useContext(AuthContext);
   const navigate = useNavigate();
 
   useEffect(() => {
+    setLoading(true);
+    setError(null);
+
+    const CancelToken = axios.CancelToken;
+    const source = CancelToken.source();
+
     axios
-      .get('http://localhost:5000/api/products')
-      .then((res) => setProducts(res.data))
-      .catch((err) => console.log(err));
-  }, []);
+      .get(`http://localhost:5000/api/products?search=${search}`)
+      .then((res) => {
+        setProducts(res.data);
+        setLoading(false);
+      })
+      .catch((err) => {
+        if (axios.isCancel(err)) {
+          console.log('Request canceled', err.message);
+        } else {
+          console.log(err);
+          setError('เกิดข้อผิดพลาดในการโหลดข้อมูลสินค้า');
+          setLoading(false);
+        }
+      });
+
+    return () => {
+      source.cancel('Operation canceled by the user.');
+    };
+  }, [search]);
 
   const handleAddToCart = (product) => {
     if (!isAuthenticated) {
@@ -28,15 +51,21 @@ const ProductList = ({ onSelectProduct, search }) => {
     alert('เพิ่มสินค้าในตะกร้าเรียบร้อยแล้ว!');
   };
 
-  const filtered = search
-    ? products.filter((p) =>
-        p.name.toLowerCase().includes(search.toLowerCase())
-      )
-    : products;
+  if (loading) {
+    return <div className="text-center p-4">กำลังโหลด...</div>;
+  }
+
+  if (error) {
+    return <div className="text-center p-4 text-red-500">{error}</div>;
+  }
+
+  if (products.length === 0) {
+    return <div className="text-center p-4">ไม่พบสินค้า</div>;
+  }
 
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2 p-2">
-      {filtered.map((product) => (
+      {products.map((product) => (
         <div
           key={product._id}
           onClick={() => navigate(`/products/${product._id}`)}
