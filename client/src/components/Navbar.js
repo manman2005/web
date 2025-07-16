@@ -28,12 +28,26 @@ const Navbar = ({ onSearch }) => {
       </Link>
 
       <div className="flex-grow flex justify-center mx-8">
-        <input
-          type="text"
-          placeholder="ค้นหาสินค้า..."
-          onChange={(e) => onSearch(e.target.value)}
-          className="w-full max-w-2xl px-4 py-2 rounded-md border-none focus:outline-none focus:ring-2 focus:ring-white focus:ring-opacity-50 text-black"
-        />
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            onSearch(e.target.elements.search.value);
+          }}
+          className="flex w-full max-w-2xl"
+        >
+          <input
+            type="text"
+            name="search"
+            placeholder="ค้นหาสินค้า..."
+            className="w-full px-4 py-2 rounded-l-md border-none focus:outline-none focus:ring-2 focus:ring-white focus:ring-opacity-50 text-black"
+          />
+          <button
+            type="submit"
+            className="px-4 py-2 bg-orange-600 text-white rounded-r-md hover:bg-orange-700 focus:outline-none"
+          >
+            ค้นหา
+          </button>
+        </form>
       </div>
 
       <div className="flex items-center gap-6 flex-shrink-0">
