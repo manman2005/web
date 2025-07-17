@@ -42,12 +42,12 @@ const Cart = () => {
   }
 
   return (
-    <div className="p-6 max-w-4xl mx-auto">
+    <div className="p-4 sm:p-6 max-w-4xl mx-auto">
       <h2 className="text-2xl font-bold mb-4">ตะกร้าสินค้า</h2>
       <div className="space-y-4">
         {cartItems.map(item => (
-          <div key={item._id} className="flex justify-between items-center border-b pb-2">
-            <div>
+          <div key={item._id} className="flex flex-col sm:flex-row sm:justify-between sm:items-center border-b pb-2">
+            <div className="w-full">
               <p className="font-semibold">{item.name}</p>
               <p>ราคา: ฿{item.price}</p>
               <div className="flex gap-2 mt-1">
@@ -56,7 +56,7 @@ const Cart = () => {
                 <button onClick={() => increaseQty(item._id)} className="px-2 bg-gray-200 rounded">+</button>
               </div>
             </div>
-            <div className="text-right">
+            <div className="w-full sm:w-auto text-left sm:text-right mt-2 sm:mt-0">
               <p>รวม: ฿{item.price * item.quantity}</p>
               <button
                 onClick={() => removeFromCart(item._id)}

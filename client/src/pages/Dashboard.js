@@ -9,7 +9,7 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="p-4">
+    <div className="p-4 sm:p-6">
       <h1 className="text-xl font-bold">Dashboard</h1>
       <p className="mt-2">This is your dashboard. You can see your stats here.</p>
     </div>

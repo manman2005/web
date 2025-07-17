@@ -9,10 +9,10 @@ const Profile = () => {
   }
 
   return (
-    <div className="p-4">
+    <div className="p-4 sm:p-6">
       <h1 className="text-xl font-bold mb-4">Your Profile</h1>
       {user ? (
-        <div className="bg-white shadow-md rounded-lg p-6">
+        <div className="bg-white shadow-md rounded-lg p-4 sm:p-6">
           <p className="text-lg mb-2"><span className="font-semibold">Username:</span> {user.name}</p>
           <p className="text-lg"><span className="font-semibold">Role:</span> {user.role}</p>
         </div>

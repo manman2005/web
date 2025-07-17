@@ -59,10 +59,10 @@ const ProductDetail = () => {
   if (!product) return <p>Product not found</p>;
 
   return (
-    <div className="container mx-auto p-4 bg-gray-50 min-h-screen">
-      <div className="bg-white rounded-lg shadow-lg overflow-hidden md:flex">
+    <div className="container mx-auto p-2 sm:p-4 bg-gray-50 min-h-screen">
+      <div className="bg-white rounded-lg shadow-lg overflow-hidden flex flex-col md:flex-row">
         {/* Product Image Gallery */}
-        <div className="md:w-1/2 p-4">
+        <div className="w-full md:w-1/2 p-4">
           {mainImage ? (
             <img
               src={mainImage}
@@ -92,7 +92,7 @@ const ProductDetail = () => {
         </div>
 
         {/* Product Details */}
-        <div className="md:w-1/2 p-6 flex flex-col justify-between">
+        <div className="w-full md:w-1/2 p-6 flex flex-col justify-between">
           <div>
             <h1 className="text-3xl font-bold text-gray-900 mb-2">{product.name}</h1>
             <div className="flex items-center mb-4">

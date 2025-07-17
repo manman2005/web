@@ -23,7 +23,7 @@ const Banner = () => {
       <img
         src={images[currentIndex]}
         alt="โปรโมชั่น"
-        className="w-full h-96 object-cover transition-opacity duration-1000 ease-in-out"
+        className="w-full h-48 sm:h-64 md:h-80 lg:h-96 object-cover transition-opacity duration-1000 ease-in-out"
       />
       <div className="absolute bottom-4 left-0 right-0 flex justify-center space-x-2">
         {images.map((_, index) => (
