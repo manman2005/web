@@ -70,6 +70,7 @@ exports.login = async (req, res) => {
 
         const payload = {
             user: {
+                _id: user._id, // เพิ่ม _id เข้าไปใน payload
                 name: user.name,
                 role: user.role
             }
@@ -98,8 +99,11 @@ exports.listUsers = async (req, res) => {
 
 exports.updateUser = async (req, res) => {
     try {
-        const { id } = req.params;
+        const userId = req.params.id || req.user._id; // Use id from params or from authenticated user
         const { name, password, role, address, phone } = req.body;
+
+        console.log('updateUser - userId:', userId);
+        console.log('updateUser - updateData:', { name, password, role, address, phone });
 
         let updateData = { name, role, address, phone };
 
@@ -109,7 +113,7 @@ exports.updateUser = async (req, res) => {
         }
 
         const user = await Users.findByIdAndUpdate(
-            id,
+            userId,
             updateData,
             { new: true }
         ).select('-password'); // Exclude password from response

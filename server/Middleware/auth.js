@@ -16,11 +16,11 @@ exports.auth = async (req, res, next) => {
         }
 
         const decoded = jwt.verify(token, 'jwtsecret');
-        console.log('Decoded Token Payload:', decoded);
+        console.log('Decoded user in auth middleware:', decoded.user); // เพิ่มบรรทัดนี้
         req.user = decoded.user;
         next();
     } catch (err) {
-        console.log('Error in Auth Middleware:', err);
-        res.status(401).send('Token Invalid');
+        console.error('Auth middleware error:', err); // เปลี่ยนข้อความ error
+        res.status(401).send('Invalid Token');
     }
 };

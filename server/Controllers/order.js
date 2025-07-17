@@ -5,8 +5,12 @@ const Product = require('../models/product'); // เพิ่ม Product model
 
 exports.createOrder = async (req, res) => {
     try {
+        console.log('--- createOrder Triggered ---');
+        console.log('req.user:', req.user); // Log req.user
         const { cart } = req.body; // ไม่รับ cartTotal จาก client โดยตรง
+        console.log('Cart received:', cart); // Log cart data
         const user = await Users.findOne({ name: req.user.name }).exec();
+        console.log('User found:', user); // Log user found
 
         if (!user) {
             return res.status(400).send('ไม่พบผู้ใช้สำหรับสร้างคำสั่งซื้อ');
