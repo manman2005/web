@@ -16,6 +16,7 @@ import Checkout from './pages/Checkout';
 import Cart from './components/Cart';
 import Home from './pages/Home';
 import ProductDetail from './components/ProductDetail';
+import Orders from './pages/Orders';
 
 const AppContent = () => {
   const [search, setSearch] = useState('');
@@ -40,6 +41,7 @@ const AppContent = () => {
                   <Route path="/cart" element={<Cart />} />
                   <Route path="/products/:id" element={<ProductDetail />} />
                   <Route path="/checkout" element={<Checkout />} />
+                  <Route path="/orders" element={<Orders />} />
                 </Routes>
               </main>
             </div>

@@ -79,6 +79,12 @@ const Navbar = ({ onSearch }) => {
               โปรไฟล์
             </Link>
             <Link
+              to="/orders"
+              className="text-white no-underline flex items-center text-sm hover:text-orange-100 transition-colors"
+            >
+              ติดตามสถานะสินค้า
+            </Link>
+            <Link
               to="/cart"
               className="text-white no-underline flex items-center text-xl relative hover:text-orange-100 transition-colors"
             >
@@ -158,6 +164,13 @@ const Navbar = ({ onSearch }) => {
                 >
                   <FaUser className="mr-1" />
                   โปรไฟล์
+                </Link>
+                <Link
+                  to="/orders"
+                  className="text-white no-underline flex items-center text-base hover:text-orange-100 transition-colors"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  ติดตามสถานะสินค้า
                 </Link>
                 <Link
                   to="/cart"
