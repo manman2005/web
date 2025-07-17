@@ -2,7 +2,7 @@ const express = require('express')
 const router = express.Router()
 
 
-const { register ,login, listUsers, updateUser } = require( '../Controllers/auth')
+const { register ,login, listUsers, updateUser, getCurrentUser } = require( '../Controllers/auth')
 const { auth } = require('../Middleware/auth');
 const { adminCheck } = require('../Middleware/admin');
 
@@ -14,6 +14,9 @@ router.post('/login',login)
 // Admin routes for user management
 router.get('/users', auth, adminCheck, listUsers);
 router.put('/users/:id', auth, adminCheck, updateUser);
+
+// User specific route
+router.get('/current-user', auth, getCurrentUser);
 
 
 module.exports = router

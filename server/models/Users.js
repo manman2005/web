@@ -8,6 +8,14 @@ const userSchema = mongoose.Schema({
     role: {
         type: String,
         default: 'user'
+    },
+    address: {
+        type: String,
+        default: ''
+    },
+    phone: {
+        type: String,
+        default: ''
     }
 }, { timestamps: true })
 

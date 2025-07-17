@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import { CartContext } from '../context/CartContext';
 import { AuthContext } from '../context/AuthContext';
 import { getToken } from '../auth/authUtils';
@@ -6,7 +6,28 @@ import axios from 'axios';
 
 const Checkout = () => {
   const { cartItems, totalPrice, clearCart } = useContext(CartContext);
-  const { isAuthenticated } = useContext(AuthContext);
+  const { isAuthenticated, user } = useContext(AuthContext);
+
+  const [shippingAddress, setShippingAddress] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      if (isAuthenticated && user) {
+        try {
+          const token = getToken();
+          const response = await axios.get('http://localhost:5000/api/auth/current-user', {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          setShippingAddress(response.data.address || '');
+          setPhoneNumber(response.data.phone || '');
+        } catch (error) {
+          console.error('Error fetching user data:', error);
+        }
+      }
+    };
+    fetchUserData();
+  }, [isAuthenticated, user]);
 
   const handleCheckout = async () => {
     if (!isAuthenticated) {
@@ -14,8 +35,26 @@ const Checkout = () => {
       return;
     }
 
+    if (!shippingAddress || !phoneNumber) {
+      alert('กรุณากรอกที่อยู่จัดส่งและเบอร์โทรศัพท์');
+      return;
+    }
+
     try {
       const token = getToken();
+
+      // Update user's address and phone number
+      await axios.put(
+        `http://localhost:5000/api/auth/users/${user._id}`,
+        { address: shippingAddress, phone: phoneNumber },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      // Create order
       const response = await axios.post(
         'http://localhost:5000/api/',
         {
@@ -56,9 +95,21 @@ const Checkout = () => {
       </div>
 
       <form className="mt-6 space-y-3">
-        <input className="w-full border p-2 rounded" type="text" placeholder="ชื่อผู้รับ" required />
-        <input className="w-full border p-2 rounded" type="text" placeholder="ที่อยู่จัดส่ง" required />
-        <input className="w-full border p-2 rounded" type="tel" placeholder="เบอร์โทรศัพท์" required />
+        <textarea
+          className="w-full border p-2 rounded"
+          placeholder="ที่อยู่จัดส่ง"
+          value={shippingAddress}
+          onChange={(e) => setShippingAddress(e.target.value)}
+          required
+        ></textarea>
+        <input
+          className="w-full border p-2 rounded"
+          type="tel"
+          placeholder="เบอร์โทรศัพท์"
+          value={phoneNumber}
+          onChange={(e) => setPhoneNumber(e.target.value)}
+          required
+        />
         <button
           type="button"
           onClick={handleCheckout}

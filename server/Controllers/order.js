@@ -173,3 +173,78 @@ exports.updateOrderStatus = async (req, res) => {
         res.status(500).send('อัปเดตสถานะคำสั่งซื้อไม่สำเร็จ');
     }
 };
+
+exports.getSalesData = async (req, res) => {
+    try {
+        const { period } = req.query; // 'daily', 'weekly', 'monthly', 'yearly'
+        let groupStage = {};
+        let sortStage = {};
+
+        switch (period) {
+            case 'daily':
+                groupStage = {
+                    year: { $year: '$createdAt' },
+                    month: { $month: '$createdAt' },
+                    day: { $dayOfMonth: '$createdAt' }
+                };
+                sortStage = { '_id.year': 1, '_id.month': 1, '_id.day': 1 };
+                break;
+            case 'weekly':
+                groupStage = {
+                    year: { $year: '$createdAt' },
+                    week: { $week: '$createdAt' }
+                };
+                sortStage = { '_id.year': 1, '_id.week': 1 };
+                break;
+            case 'monthly':
+                groupStage = {
+                    year: { $year: '$createdAt' },
+                    month: { $month: '$createdAt' }
+                };
+                sortStage = { '_id.year': 1, '_id.month': 1 };
+                break;
+            case 'yearly':
+                groupStage = {
+                    year: { $year: '$createdAt' }
+                };
+                sortStage = { '_id.year': 1 };
+                break;
+            default:
+                return res.status(400).send('Invalid period specified. Use daily, weekly, monthly, or yearly.');
+        }
+
+        const salesData = await Order.aggregate([
+            {
+                $match: {
+                    orderstatus: 'Completed' // Only count completed orders as sales
+                }
+            },
+            {
+                $unwind: '$products' // Deconstruct the products array
+            },
+            {
+                $group: {
+                    _id: groupStage,
+                    totalItemsSold: { $sum: '$products.count' },
+                    totalSalesValue: { $sum: { $multiply: ['$products.count', '$products.price'] } } // Calculate total sales value
+                }
+            },
+            {
+                $sort: sortStage
+            },
+            {
+                $project: {
+                    _id: 0, // Exclude the default _id
+                    period: '$_id',
+                    totalItemsSold: 1,
+                    totalSalesValue: 1
+                }
+            }
+        ]);
+
+        res.json(salesData);
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Failed to get sales data');
+    }
+};

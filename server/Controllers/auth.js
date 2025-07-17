@@ -99,9 +99,9 @@ exports.listUsers = async (req, res) => {
 exports.updateUser = async (req, res) => {
     try {
         const { id } = req.params;
-        const { name, password, role } = req.body;
+        const { name, password, role, address, phone } = req.body;
 
-        let updateData = { name, role };
+        let updateData = { name, role, address, phone };
 
         if (password) {
             const salt = await bcrypt.genSalt(10);
@@ -118,6 +118,19 @@ exports.updateUser = async (req, res) => {
             return res.status(404).json({ message: 'User not found' });
         }
 
+        res.json(user);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
+exports.getCurrentUser = async (req, res) => {
+    try {
+        const user = await Users.findOne({ name: req.user.name }).select('-password');
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
         res.json(user);
     } catch (err) {
         console.error(err);

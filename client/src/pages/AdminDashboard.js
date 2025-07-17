@@ -2,7 +2,28 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { getToken } from '../auth/authUtils';
 import { Link } from 'react-router-dom';
-import { FiUsers, FiShoppingCart, FiEdit, FiPlusCircle, FiXCircle, FiBox, FiHome } from 'react-icons/fi';
+import { FiUsers, FiShoppingCart, FiEdit, FiPlusCircle, FiXCircle, FiBox, FiHome, FiBarChart2 } from 'react-icons/fi';
+import { Line } from 'react-chartjs-2';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+} from 'chart.js';
+
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend
+);
 
 const AdminDashboard = () => {
   const [orders, setOrders] = useState([]);
@@ -23,6 +44,10 @@ const AdminDashboard = () => {
   const [addSelectedFiles, setAddSelectedFiles] = useState([]);
   const [activeTab, setActiveTab] = useState('overview');
 
+  // New states for sales data
+  const [salesData, setSalesData] = useState([]);
+  const [selectedPeriod, setSelectedPeriod] = useState('daily'); // 'daily', 'weekly', 'monthly', 'yearly'
+
   // Pagination states for Users
   const [currentPageUsers, setCurrentPageUsers] = useState(1);
   const [usersPerPage] = useState(5); // 5 users per page
@@ -40,6 +65,22 @@ const AdminDashboard = () => {
     fetchUsers();
     fetchProducts();
   }, []);
+
+  useEffect(() => {
+    fetchSalesData(selectedPeriod);
+  }, [selectedPeriod]);
+
+  const fetchSalesData = async (period) => {
+    try {
+      const token = getToken();
+      const response = await axios.get(`http://localhost:5000/api/admin/sales?period=${period}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setSalesData(response.data);
+    } catch (error) {
+      console.error('Error fetching sales data:', error);
+    }
+  };
 
   const fetchOrders = async () => {
     try {
@@ -251,6 +292,97 @@ const AdminDashboard = () => {
     }
   };
 
+  const getChartLabels = () => {
+    if (!salesData || salesData.length === 0) return [];
+
+    return salesData.map(data => {
+      if (selectedPeriod === 'daily') {
+        return `${data.period.day}/${data.period.month}/${data.period.year}`;
+      } else if (selectedPeriod === 'weekly') {
+        return `Week ${data.period.week}, ${data.period.year}`;
+      } else if (selectedPeriod === 'monthly') {
+        return `${data.period.month}/${data.period.year}`;
+      } else if (selectedPeriod === 'yearly') {
+        return `${data.period.year}`;
+      }
+      return '';
+    });
+  };
+
+  const chartData = {
+    labels: getChartLabels(),
+    datasets: [
+      {
+        label: 'จำนวนสินค้าที่ขายได้',
+        data: salesData.map(data => data.totalItemsSold),
+        borderColor: 'rgb(75, 192, 192)',
+        backgroundColor: 'rgba(75, 192, 192, 0.5)',
+        tension: 0.1,
+      },
+      {
+        label: 'มูลค่าการขาย (฿)',
+        data: salesData.map(data => data.totalSalesValue),
+        borderColor: 'rgb(153, 102, 255)',
+        backgroundColor: 'rgba(153, 102, 255, 0.5)',
+        tension: 0.1,
+        yAxisID: 'y1',
+      },
+    ],
+  };
+
+  const chartOptions = {
+    responsive: true,
+    interaction: {
+      mode: 'index',
+      intersect: false,
+    },
+    plugins: {
+      title: {
+        display: true,
+        text: 'ข้อมูลยอดขายสินค้า',
+      },
+      tooltip: {
+        callbacks: {
+          label: function(context) {
+            let label = context.dataset.label || '';
+            if (label) {
+              label += ': ';
+            }
+            if (context.dataset.label === 'มูลค่าการขาย (฿)') {
+              label += `฿${context.raw.toLocaleString()}`;
+            } else {
+              label += context.raw.toLocaleString();
+            }
+            return label;
+          }
+        }
+      }
+    },
+    scales: {
+      y: {
+        type: 'linear',
+        display: true,
+        position: 'left',
+        title: {
+          display: true,
+          text: 'จำนวนสินค้าที่ขายได้',
+        },
+      },
+      y1: {
+        type: 'linear',
+        display: true,
+        position: 'right',
+        grid: {
+          drawOnChartArea: false,
+        },
+        title: {
+          display: true,
+          text: 'มูลค่าการขาย (฿)',
+        },
+      },
+    },
+  };
+
   return (
     <div className="bg-gray-50 min-h-screen">
       <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto">
@@ -309,6 +441,18 @@ const AdminDashboard = () => {
             >
               <FiShoppingCart /> Orders
             </button>
+            <button
+              onClick={() => setActiveTab('sales-report')}
+              className={`
+                ${activeTab === 'sales-report'
+                  ? 'border-indigo-500 text-indigo-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }
+                whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm flex items-center gap-2
+              `}
+            >
+              <FiBarChart2 /> Sales Report
+            </button>
           </nav>
         </div>
 
@@ -329,6 +473,33 @@ const AdminDashboard = () => {
               <FiShoppingCart className="text-yellow-500 text-4xl mx-auto mb-3" />
               <h3 className="text-xl font-semibold text-gray-700">Total Orders</h3>
               <p className="text-4xl font-bold text-gray-900">{orders.length}</p>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'sales-report' && (
+          <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
+            <h2 className="text-2xl font-semibold text-gray-700 mb-4 flex items-center gap-3"><FiBarChart2 /> Sales Report</h2>
+            <div className="mb-4">
+              <label htmlFor="period-select" className="block text-sm font-medium text-gray-700 mb-1">เลือกช่วงเวลา:</label>
+              <select
+                id="period-select"
+                value={selectedPeriod}
+                onChange={(e) => setSelectedPeriod(e.target.value)}
+                className="mt-1 block w-full md:w-1/3 pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
+              >
+                <option value="daily">รายวัน</option>
+                <option value="weekly">รายสัปดาห์</option>
+                <option value="monthly">รายเดือน</option>
+                <option value="yearly">รายปี</option>
+              </select>
+            </div>
+            <div className="relative h-96">
+              {salesData.length > 0 ? (
+                <Line data={chartData} options={chartOptions} />
+              ) : (
+                <p className="text-center text-gray-500">ไม่มีข้อมูลยอดขายสำหรับช่วงเวลานี้</p>
+              )}
             </div>
           </div>
         )}
