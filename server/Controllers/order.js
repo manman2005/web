@@ -9,8 +9,8 @@ exports.createOrder = async (req, res) => {
         console.log('req.user:', req.user); // Log req.user
         const { cart } = req.body; // ไม่รับ cartTotal จาก client โดยตรง
         console.log('Cart received:', cart); // Log cart data
-        const user = await Users.findOne({ name: req.user.name }).exec();
-        console.log('User found:', user); // Log user found
+        const user = await Users.findById(req.user._id).exec();
+        console.log('User found by ID:', user); // Log user found by ID
 
         if (!user) {
             return res.status(400).send('ไม่พบผู้ใช้สำหรับสร้างคำสั่งซื้อ');
@@ -68,7 +68,7 @@ exports.createOrder = async (req, res) => {
 
 exports.getOrders = async (req, res) => {
     try {
-        const user = await Users.findOne({ name: req.user.name }).exec();
+        const user = await Users.findById(req.user._id).exec();
 
         let orders = await Order.find({ orderBy: user._id })
             .populate('products.product')

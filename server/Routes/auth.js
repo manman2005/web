@@ -13,7 +13,7 @@ router.post('/login',login)
 
 // Admin routes for user management
 router.get('/users', auth, adminCheck, listUsers);
-router.put('/users/:id', auth, adminCheck, updateUser);
+router.put('/users/:id', auth, updateUser);
 
 // User specific route
 router.get('/current-user', auth, getCurrentUser);

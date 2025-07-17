@@ -44,15 +44,20 @@ const Checkout = () => {
       const token = getToken();
 
       // Update user's address and phone number
-      await axios.put(
-        `http://localhost:5000/api/auth/users/${user._id}`,
-        { address: shippingAddress, phone: phoneNumber },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      if (user && user._id) { // Add this check
+        await axios.put(
+          `http://localhost:5000/api/auth/users/${user._id}`,
+          { address: shippingAddress, phone: phoneNumber },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+      } else {
+        console.warn('User ID not available for updating address and phone number.');
+        // Optionally, you can return or show an error to the user here
+      }
 
       // Create order
       const response = await axios.post(
