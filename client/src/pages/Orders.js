@@ -47,6 +47,21 @@ const Orders = () => {
     return <div className="text-center p-4">กรุณาเข้าสู่ระบบเพื่อดูคำสั่งซื้อของคุณ</div>;
   }
 
+  const getThaiStatus = (status) => {
+    switch (status) {
+      case 'Pending':
+        return 'รอดำเนินการ';
+      case 'Processing':
+        return 'กำลังดำเนินการ';
+      case 'Completed':
+        return 'สำเร็จ';
+      case 'Cancelled':
+        return 'ยกเลิก';
+      default:
+        return status;
+    }
+  };
+
   return (
     <div className="p-4 sm:p-6 max-w-4xl mx-auto">
       <h2 className="text-2xl font-bold mb-6 text-center">สถานะคำสั่งซื้อของคุณ</h2>
@@ -58,19 +73,22 @@ const Orders = () => {
             <div key={order._id} className="bg-white shadow-md rounded-lg p-5 border border-gray-200">
               <div className="flex justify-between items-center mb-3 pb-3 border-b border-gray-200">
                 <h3 className="text-lg font-semibold">คำสั่งซื้อ #{order._id.substring(0, 8)}</h3>
-                <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                <span className="flex items-center gap-2">
+                  <span className="text-gray-700 font-medium">฿{order.cartTotal.toFixed(2)}</span>
+                  <span className={`px-3 py-1 rounded-full text-sm font-medium ${
                   order.orderstatus === 'Pending' ? 'bg-yellow-100 text-yellow-800' :
                   order.orderstatus === 'Processing' ? 'bg-blue-100 text-blue-800' :
                   order.orderstatus === 'Completed' ? 'bg-green-100 text-green-800' :
                   'bg-red-100 text-red-800'
                 }`}>
-                  {order.orderstatus}
+                  {getThaiStatus(order.orderstatus)}
+                </span>
                 </span>
               </div>
               <p className="text-gray-600 mb-2">วันที่สั่งซื้อ: {new Date(order.createdAt).toLocaleDateString('th-TH', {
                 year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit'
               })}</p>
-              <p className="text-gray-700 font-medium mb-3">ยอดรวม: ฿{order.cartTotal.toFixed(2)}</p>
+              
               <div className="mb-3">
                 <h4 className="text-md font-semibold mb-2">สินค้าในคำสั่งซื้อ:</h4>
                 <ul className="list-disc list-inside space-y-1 text-gray-700">
