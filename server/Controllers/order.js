@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const Order = require('../models/Order');
 const Users = require('../models/Users');
 const Product = require('../models/product'); // เพิ่ม Product model
@@ -38,9 +39,7 @@ exports.createOrder = async (req, res) => {
                 return res.status(400).send(`สินค้า ${product.name} มีไม่เพียงพอในสต็อก`);
             }
 
-            // ลดจำนวนสต็อกสินค้า
-            product.quantity -= item.count;
-            await product.save();
+            
 
             productsForOrder.push({
                 product: product._id,
@@ -82,7 +81,8 @@ exports.getAllOrders = async (req, res) => {
     try {
         let orders = await Order.find({})
             .populate('products.product')
-            .populate('orderBy', 'name') // Populate user name
+            .populate('orderBy', 'name address phone') // Populate user name, address, and phone
+            .sort({ createdAt: -1 }) // Sort by creation date, newest first
             .exec();
 
         res.json(orders);
@@ -92,29 +92,79 @@ exports.getAllOrders = async (req, res) => {
     }
 };
 
-exports.updateOrderStatus = async (req, res) => {
+exports.deleteOrder = async (req, res) => {
     try {
-        const { orderId, orderStatus } = req.body;
+        const { orderId } = req.params;
 
-        // Validate orderId
         if (!mongoose.Types.ObjectId.isValid(orderId)) {
             return res.status(400).send('รหัสคำสั่งซื้อไม่ถูกต้อง');
         }
 
-        // Validate orderStatus
-        const allowedStatuses = ['Processing', 'Shipped', 'Delivered', 'Cancelled'];
+        const deletedOrder = await Order.findByIdAndDelete(orderId).exec();
+
+        if (!deletedOrder) {
+            return res.status(404).send('ไม่พบคำสั่งซื้อที่จะลบ');
+        }
+
+        res.send({ message: 'ลบคำสั่งซื้อสำเร็จ', deletedOrder });
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('ลบคำสั่งซื้อไม่สำเร็จ');
+    }
+};
+
+exports.updateOrderStatus = async (req, res) => {
+    try {
+        const { orderId, orderStatus } = req.body;
+
+        if (!mongoose.Types.ObjectId.isValid(orderId)) {
+            return res.status(400).send('รหัสคำสั่งซื้อไม่ถูกต้อง');
+        }
+
+        const allowedStatuses = ['Pending', 'Processing', 'Cancelled', 'Completed'];
         if (!allowedStatuses.includes(orderStatus)) {
             return res.status(400).send('สถานะคำสั่งซื้อไม่ถูกต้อง');
         }
 
-        let orderUpdated = await Order.findByIdAndUpdate(
-            orderId,
-            { orderstatus: orderStatus },
-            { new: true }
-        ).exec();
+        // Find the order first to get its current status and products
+        let order = await Order.findById(orderId).populate('products.product').exec();
 
-        if (!orderUpdated) {
+        if (!order) {
             return res.status(404).send('ไม่พบคำสั่งซื้อ');
+        }
+
+        const previousStatus = order.orderstatus;
+
+        // Update the order status
+        order.orderstatus = orderStatus;
+        let orderUpdated = await order.save();
+
+        // If the new status is 'Completed' and the previous status was not 'Completed',
+        // then decrease product quantities
+        if (orderStatus === 'Completed' && previousStatus !== 'Completed') {
+            for (const item of order.products) {
+                const product = await Product.findById(item.product._id).exec();
+                if (product) {
+                    product.quantity -= item.count;
+                    await product.save();
+                } else {
+                    console.warn(`Product with ID ${item.product._id} not found for stock update.`);
+                }
+            }
+        }
+
+        // If the new status is 'Cancelled' and the previous status was not 'Cancelled',
+        // then increase product quantities (return to stock)
+        if (orderStatus === 'Cancelled' && previousStatus !== 'Cancelled') {
+            for (const item of order.products) {
+                const product = await Product.findById(item.product._id).exec();
+                if (product) {
+                    product.quantity += item.count;
+                    await product.save();
+                } else {
+                    console.warn(`Product with ID ${item.product._id} not found for stock update.`);
+                }
+            }
         }
 
         res.send(orderUpdated);

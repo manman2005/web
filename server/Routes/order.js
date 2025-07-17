@@ -6,12 +6,13 @@ const { auth } = require('../Middleware/auth');
 const { adminCheck } = require('../Middleware/admin');
 
 // Controller
-const { createOrder, getOrders, getAllOrders, updateOrderStatus } = require('../Controllers/order');
+const { createOrder, getOrders, getAllOrders, updateOrderStatus, deleteOrder } = require('../Controllers/order');
 
 // Routes
 router.post('/', auth, createOrder);
 router.get('/orders', auth, getOrders); // For user specific orders
 router.get('/admin/orders', auth, adminCheck, getAllOrders); // For admin to get all orders
 router.put('/order/order-status', auth, adminCheck, updateOrderStatus);
+router.delete('/order/:orderId', auth, adminCheck, deleteOrder);
 
 module.exports = router;

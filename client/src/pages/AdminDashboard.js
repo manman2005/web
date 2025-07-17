@@ -224,6 +224,20 @@ const AdminDashboard = () => {
     }
   };
 
+  const handleDeleteOrder = async (orderId) => {
+    if (window.confirm('คุณแน่ใจหรือไม่ว่าต้องการลบคำสั่งซื้อนี้?')) {
+      try {
+        const token = getToken();
+        await axios.delete(`http://localhost:5000/api/order/${orderId}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        fetchOrders();
+      } catch (error) {
+        console.error('Error deleting order:', error);
+      }
+    }
+  };
+
   const getStatusBadge = (status) => {
     switch (status) {
       case 'Processing':
@@ -447,12 +461,20 @@ const AdminDashboard = () => {
                     <div>
                       <p className="font-semibold text-gray-800">รหัสคำสั่งซื้อ: <span className="font-normal text-gray-600">{order._id}</span></p>
                       <p className="font-semibold text-gray-800">ชื่อลูกค้า: <span className="font-normal text-gray-600">{order.orderBy?.name || 'N/A'}</span></p>
+                      <p className="font-semibold text-gray-800">ที่อยู่: <span className="font-normal text-gray-600">{order.orderBy?.address || 'N/A'}</span></p>
+                      <p className="font-semibold text-gray-800">เบอร์โทรศัพท์: <span className="font-normal text-gray-600">{order.orderBy?.phone || 'N/A'}</span></p>
                     </div>
                     <div className="text-right">
                       <p className="font-semibold text-gray-800">ราคารวม: <span className="font-bold text-indigo-600">฿{order.cartTotal}</span></p>
                       <span className={`text-sm font-medium mr-2 px-2.5 py-0.5 rounded ${getStatusBadge(order.orderstatus)}`}>
                         {order.orderstatus}
                       </span>
+                      <button
+                        onClick={() => handleDeleteOrder(order._id)}
+                        className="ml-2 px-3 py-1 bg-red-500 text-white rounded-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50"
+                      >
+                        ลบ
+                      </button>
                     </div>
                   </div>
                   <div className="mt-4">
@@ -473,10 +495,10 @@ const AdminDashboard = () => {
                       onChange={(e) => handleStatusChange(order._id, e.target.value)}
                       className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
                     >
-                      <option>ยังไม่ดำเนินการ</option>
-                      <option>กำลังดำเนินการ</option>
-                      <option>ยกเลิก</option>
-                      <option>เสร็จสมบูรณ์</option>
+                      <option value="Pending">รอดำเนินการ</option>
+                      <option value="Processing">กำลังดำเนินการ</option>
+                      <option value="Cancelled">ยกเลิก</option>
+                      <option value="Completed">เสร็จสมบูรณ์</option>
                     </select>
                   </div>
                 </div>
