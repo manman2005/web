@@ -2,12 +2,12 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { getToken } from '../auth/authUtils';
 import { Link } from 'react-router-dom';
-import { FiUsers, FiShoppingCart, FiEdit, FiPlusCircle, FiXCircle, FiBox } from 'react-icons/fi';
+import { FiUsers, FiShoppingCart, FiEdit, FiPlusCircle, FiXCircle, FiBox, FiHome } from 'react-icons/fi';
 
 const AdminDashboard = () => {
   const [orders, setOrders] = useState([]);
   const [users, setUsers] = useState([]);
-  const [products, setProducts] = useState([]); // Add state for products
+  const [products, setProducts] = useState([]);
   const [editingUser, setEditingUser] = useState(null);
   const [userForm, setUserForm] = useState({ name: '', role: '' });
   const [editingProduct, setEditingProduct] = useState(null);
@@ -21,11 +21,24 @@ const AdminDashboard = () => {
     name: '', price: 0, quantity: 0, description: '', category: '', brand: '', images: []
   });
   const [addSelectedFiles, setAddSelectedFiles] = useState([]);
+  const [activeTab, setActiveTab] = useState('overview');
+
+  // Pagination states for Users
+  const [currentPageUsers, setCurrentPageUsers] = useState(1);
+  const [usersPerPage] = useState(5); // 5 users per page
+
+  // Pagination states for Products
+  const [currentPageProducts, setCurrentPageProducts] = useState(1);
+  const [productsPerPage] = useState(5); // 5 products per page
+
+  // Pagination states for Orders
+  const [currentPageOrders, setCurrentPageOrders] = useState(1);
+  const [ordersPerPage] = useState(5); // 5 orders per page
 
   useEffect(() => {
     fetchOrders();
     fetchUsers();
-    fetchProducts(); // Fetch products on component mount
+    fetchProducts();
   }, []);
 
   const fetchOrders = async () => {
@@ -52,10 +65,9 @@ const AdminDashboard = () => {
     }
   };
 
-  // Function to fetch products
   const fetchProducts = async () => {
     try {
-      const token = getToken(); // Assuming admin auth is needed
+      const token = getToken();
       const response = await axios.get('http://localhost:5000/api/products', {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -116,7 +128,7 @@ const AdminDashboard = () => {
       brand: product.brand,
       images: product.images,
     });
-    setSelectedFiles([]); // Clear selected files when opening for edit
+    setSelectedFiles([]);
   };
 
   const handleImageChange = (e) => {
@@ -134,7 +146,7 @@ const AdminDashboard = () => {
       const token = getToken();
       const formData = new FormData();
       for (const key in productForm) {
-        if (key !== 'images') { // Don't append images directly, handle separately
+        if (key !== 'images') {
           formData.append(key, productForm[key]);
         }
       }
@@ -232,168 +244,246 @@ const AdminDashboard = () => {
           <h1 className="text-3xl font-bold text-gray-800">Admin Dashboard</h1>
         </div>
 
-        {/* Users Section */}
-        <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-2xl font-semibold text-gray-700 flex items-center gap-3"><FiUsers /> All Users</h2>
-            <input
-              type="text"
-              placeholder="Search users..."
-              value={userSearch}
-              onChange={(e) => setUserSearch(e.target.value)}
-              className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            />
-          </div>
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
-                  <th scope="col" className="relative px-6 py-3"><span className="sr-only">Edit</span></th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {users
-                  .filter((user) =>
-                    user.name.toLowerCase().includes(userSearch.toLowerCase())
-                  )
-                  .map((user) => (
-                  <tr key={user._id}>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{user.name}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${user.role === 'admin' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
-                        {user.role}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                      <button onClick={() => handleEditUser(user)} className="text-indigo-600 hover:text-indigo-900 flex items-center gap-1">
-                        <FiEdit /> Edit
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+        {/* Tab Navigation */}
+        <div className="mb-8 border-b border-gray-200">
+          <nav className="-mb-px flex space-x-8" aria-label="Tabs">
+            <button
+              onClick={() => setActiveTab('overview')}
+              className={`
+                ${activeTab === 'overview'
+                  ? 'border-indigo-500 text-indigo-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }
+                whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm flex items-center gap-2
+              `}
+            >
+              <FiHome /> Overview
+            </button>
+            <button
+              onClick={() => setActiveTab('users')}
+              className={`
+                ${activeTab === 'users'
+                  ? 'border-indigo-500 text-indigo-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }
+                whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm flex items-center gap-2
+              `}
+            >
+              <FiUsers /> Users
+            </button>
+            <button
+              onClick={() => setActiveTab('products')}
+              className={`
+                ${activeTab === 'products'
+                  ? 'border-indigo-500 text-indigo-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }
+                whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm flex items-center gap-2
+              `}
+            >
+              <FiBox /> Products
+            </button>
+            <button
+              onClick={() => setActiveTab('orders')}
+              className={`
+                ${activeTab === 'orders'
+                  ? 'border-indigo-500 text-indigo-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }
+                whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm flex items-center gap-2
+              `}
+            >
+              <FiShoppingCart /> Orders
+            </button>
+          </nav>
         </div>
 
-        {/* Products Section */}
-        <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-2xl font-semibold text-gray-700 flex items-center gap-3"><FiBox /> All Products</h2>
-            <div className="flex gap-2">
-              <input
-                type="text"
-                placeholder="Search products..."
-                value={productSearch}
-                onChange={(e) => setProductSearch(e.target.value)}
-                className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              />
-              <Link
-                to="#"
-                onClick={() => setAddingProduct(true)}
-                className="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition-transform transform hover:scale-105"
-              >
-                <FiPlusCircle />
-                Add New Product
-              </Link>
+        {/* Content based on activeTab */}
+        {activeTab === 'overview' && (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div className="bg-white rounded-lg shadow-lg p-6 text-center">
+              <FiUsers className="text-indigo-500 text-4xl mx-auto mb-3" />
+              <h3 className="text-xl font-semibold text-gray-700">Total Users</h3>
+              <p className="text-4xl font-bold text-gray-900">{users.length}</p>
+            </div>
+            <div className="bg-white rounded-lg shadow-lg p-6 text-center">
+              <FiBox className="text-green-500 text-4xl mx-auto mb-3" />
+              <h3 className="text-xl font-semibold text-gray-700">Total Products</h3>
+              <p className="text-4xl font-bold text-gray-900">{products.length}</p>
+            </div>
+            <div className="bg-white rounded-lg shadow-lg p-6 text-center">
+              <FiShoppingCart className="text-yellow-500 text-4xl mx-auto mb-3" />
+              <h3 className="text-xl font-semibold text-gray-700">Total Orders</h3>
+              <p className="text-4xl font-bold text-gray-900">{orders.length}</p>
             </div>
           </div>
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quantity</th>
-                  <th scope="col" className="relative px-6 py-3"><span className="sr-only">Edit</span></th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {products
-                  .filter((product) =>
-                    product.name.toLowerCase().includes(productSearch.toLowerCase())
-                  )
-                  .map((product) => (
-                  <tr key={product._id}>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{product.name}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">฿{product.price}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{product.quantity}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium flex justify-end items-center gap-2">
-                      <button onClick={() => handleEditProduct(product)} className="text-indigo-600 hover:text-indigo-900 flex items-center gap-1">
-                        <FiEdit /> Edit
-                      </button>
-                      <button onClick={() => handleDeleteProduct(product._id)} className="text-red-600 hover:text-red-900 flex items-center gap-1">
-                        <FiXCircle /> Delete
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
+        )}
 
-        {/* Orders Section */}
-        <div className="bg-white rounded-lg shadow-lg p-6">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-2xl font-semibold text-gray-700 flex items-center gap-3"><FiShoppingCart /> รายการสั่งซื้อทั้งหมด</h2>
-            <input
-              type="text"
-              placeholder="Search orders by ID..."
-              value={orderSearch}
-              onChange={(e) => setOrderSearch(e.target.value)}
-              className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            />
+        {activeTab === 'users' && (
+          <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-2xl font-semibold text-gray-700 flex items-center gap-3"><FiUsers /> All Users</h2>
+              <input
+                type="text"
+                placeholder="Search users..."
+                value={userSearch}
+                onChange={(e) => setUserSearch(e.target.value)}
+                className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              />
+            </div>
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
+                    <th scope="col" className="relative px-6 py-3"><span className="sr-only">Edit</span></th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {users
+                    .filter((user) =>
+                      user.name.toLowerCase().includes(userSearch.toLowerCase())
+                    )
+                    .map((user) => (
+                    <tr key={user._id}>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{user.name}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${user.role === 'admin' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
+                          {user.role}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                        <button onClick={() => handleEditUser(user)} className="text-indigo-600 hover:text-indigo-900 flex items-center gap-1">
+                          <FiEdit /> Edit
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
-          <div className="space-y-6">
-            {orders
-              .filter((order) =>
-                order._id.toLowerCase().includes(orderSearch.toLowerCase())
-              )
-              .map((order) => (
-              <div key={order._id} className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                <div className="flex flex-wrap justify-between items-start mb-2">
-                  <div>
-                    <p className="font-semibold text-gray-800">รหัสคำสั่งซื้อ: <span className="font-normal text-gray-600">{order._id}</span></p>
-                    <p className="font-semibold text-gray-800">ชื่อลูกค้า: <span className="font-normal text-gray-600">{order.orderBy?.name || 'N/A'}</span></p>
-                  </div>
-                  <div className="text-right">
-                    <p className="font-semibold text-gray-800">ราคารวม: <span className="font-bold text-indigo-600">฿{order.cartTotal}</span></p>
-                    <span className={`text-sm font-medium mr-2 px-2.5 py-0.5 rounded ${getStatusBadge(order.orderstatus)}`}>
-                      {order.orderstatus}
-                    </span>
-                  </div>
-                </div>
-                <div className="mt-4">
-                  <p className="font-semibold text-gray-700 mb-2">รายการสินค้า:</p>
-                  <ul className="list-disc list-inside space-y-1 text-sm text-gray-600">
-                    {order.products.map((item) => (
-                      <li key={item._id}>
-                        {item.product?.name || 'N/A'} x {item.count} (฿{item.price})
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-                <div className="mt-4">
-                  <label htmlFor={`status-${order._id}`} className="block text-sm font-medium text-gray-700 mb-1">อัพเดทสถานะ:</label>
-                  <select
-                    id={`status-${order._id}`}
-                    value={order.orderstatus}
-                    onChange={(e) => handleStatusChange(order._id, e.target.value)}
-                    className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
-                  >
-                    <option>ยังไม่ดำเนินการ</option>
-                    <option>กำลังดำเนินการ</option>
-                    <option>ยกเลิก</option>
-                    <option>เสร็จสมบูรณ์</option>
-                  </select>
-                </div>
+        )}
+
+        {activeTab === 'products' && (
+          <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-2xl font-semibold text-gray-700 flex items-center gap-3"><FiBox /> All Products</h2>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  placeholder="Search products..."
+                  value={productSearch}
+                  onChange={(e) => setProductSearch(e.target.value)}
+                  className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+                <Link
+                  to="#"
+                  onClick={() => setAddingProduct(true)}
+                  className="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition-transform transform hover:scale-105"
+                >
+                  <FiPlusCircle />
+                  Add New Product
+                </Link>
               </div>
-            ))}
+            </div>
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quantity</th>
+                    <th scope="col" className="relative px-6 py-3"><span className="sr-only">Edit</span></th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {products
+                    .filter((product) =>
+                      product.name.toLowerCase().includes(productSearch.toLowerCase())
+                    )
+                    .map((product) => (
+                    <tr key={product._id}>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{product.name}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">฿{product.price}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{product.quantity}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium flex justify-end items-center gap-2">
+                        <button onClick={() => handleEditProduct(product)} className="text-indigo-600 hover:text-indigo-900 flex items-center gap-1">
+                          <FiEdit /> Edit
+                        </button>
+                        <button onClick={() => handleDeleteProduct(product._id)} className="text-red-600 hover:text-red-900 flex items-center gap-1">
+                          <FiXCircle /> Delete
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
-        </div>
+        )}
+
+        {activeTab === 'orders' && (
+          <div className="bg-white rounded-lg shadow-lg p-6">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-2xl font-semibold text-gray-700 flex items-center gap-3"><FiShoppingCart /> รายการสั่งซื้อทั้งหมด</h2>
+              <input
+                type="text"
+                placeholder="Search orders by ID..."
+                value={orderSearch}
+                onChange={(e) => setOrderSearch(e.target.value)}
+                className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              />
+            </div>
+            <div className="space-y-6">
+              {orders
+                .filter((order) =>
+                  order._id.toLowerCase().includes(orderSearch.toLowerCase())
+                )
+                .map((order) => (
+                <div key={order._id} className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                  <div className="flex flex-wrap justify-between items-start mb-2">
+                    <div>
+                      <p className="font-semibold text-gray-800">รหัสคำสั่งซื้อ: <span className="font-normal text-gray-600">{order._id}</span></p>
+                      <p className="font-semibold text-gray-800">ชื่อลูกค้า: <span className="font-normal text-gray-600">{order.orderBy?.name || 'N/A'}</span></p>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-semibold text-gray-800">ราคารวม: <span className="font-bold text-indigo-600">฿{order.cartTotal}</span></p>
+                      <span className={`text-sm font-medium mr-2 px-2.5 py-0.5 rounded ${getStatusBadge(order.orderstatus)}`}>
+                        {order.orderstatus}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="mt-4">
+                    <p className="font-semibold text-gray-700 mb-2">รายการสินค้า:</p>
+                    <ul className="list-disc list-inside space-y-1 text-sm text-gray-600">
+                      {order.products.map((item) => (
+                        <li key={item._id}>
+                          {item.product?.name || 'N/A'} x {item.count} (฿{item.price})
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                  <div className="mt-4">
+                    <label htmlFor={`status-${order._id}`} className="block text-sm font-medium text-gray-700 mb-1">อัพเดทสถานะ:</label>
+                    <select
+                      id={`status-${order._id}`}
+                      value={order.orderstatus}
+                      onChange={(e) => handleStatusChange(order._id, e.target.value)}
+                      className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
+                    >
+                      <option>ยังไม่ดำเนินการ</option>
+                      <option>กำลังดำเนินการ</option>
+                      <option>ยกเลิก</option>
+                      <option>เสร็จสมบูรณ์</option>
+                    </select>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Edit User Modal */}
@@ -686,3 +776,4 @@ const AdminDashboard = () => {
 };
 
 export default AdminDashboard;
+

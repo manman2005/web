@@ -4,13 +4,26 @@ const jwt = require('jsonwebtoken');
 
 exports.register = async (req, res) => {
     try {
-        // 1. Check user
         const { username, password } = req.body;
 
+        // Server-side Validation
+        if (!username || !password) {
+            return res.status(400).json({ message: 'กรุณากรอกชื่อผู้ใช้และรหัสผ่าน' });
+        }
+
+        if (username.length < 3) {
+            return res.status(400).json({ message: 'ชื่อผู้ใช้ต้องมีความยาวอย่างน้อย 3 ตัวอักษร' });
+        }
+
+        if (password.length < 6) {
+            return res.status(400).json({ message: 'รหัสผ่านต้องมีความยาวอย่างน้อย 6 ตัวอักษร' });
+        }
+
+        // 1. Check user
         let user = await Users.findOne({ name: username });
 
         if (user) {
-            return res.status(400).json({ message: 'User Already Exists!!!' });
+            return res.status(400).json({ message: 'ชื่อผู้ใช้นี้มีอยู่แล้ว' });
         }
 
         // 2. Encrypt
@@ -26,7 +39,7 @@ exports.register = async (req, res) => {
         // 3. Save
         await user.save();
 
-        res.json({ message: 'Register Success' });
+        res.json({ message: 'ลงทะเบียนสำเร็จ' });
     } catch (err) {
         console.log(err);
         res.status(500).json({ message: 'Server error' });
@@ -37,17 +50,22 @@ exports.login = async (req, res) => {
     try {
         const { username, password } = req.body;
 
+        // Server-side Validation
+        if (!username || !password) {
+            return res.status(400).json({ message: 'กรุณากรอกชื่อผู้ใช้และรหัสผ่าน' });
+        }
+
         // ใช้ findOne แทน findOneAndUpdate
         const user = await Users.findOne({ name: username });
 
         if (!user) {
-            return res.status(400).json({ message: 'User not found!!!' });
+            return res.status(400).json({ message: 'ไม่พบชื่อผู้ใช้' });
         }
 
         const isMatch = await bcrypt.compare(password, user.password);
 
         if (!isMatch) {
-            return res.status(400).json({ message: 'Password Invalid!!!' });
+            return res.status(400).json({ message: 'รหัสผ่านไม่ถูกต้อง' });
         }
 
         const payload = {

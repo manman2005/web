@@ -8,11 +8,29 @@ import { jwtDecode } from 'jwt-decode';
 const Login = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [errorMessage, setErrorMessage] = useState(''); // เพิ่ม state สำหรับข้อความข้อผิดพลาด
   const navigate = useNavigate();
   const { login } = useContext(AuthContext);
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    setErrorMessage(''); // ล้างข้อความข้อผิดพลาดเก่า
+
+    // Client-side Validation
+    if (!username || !password) {
+      setErrorMessage('กรุณากรอกชื่อผู้ใช้และรหัสผ่าน');
+      return;
+    }
+
+    if (username.length < 3) {
+      setErrorMessage('ชื่อผู้ใช้ต้องมีความยาวอย่างน้อย 3 ตัวอักษร');
+      return;
+    }
+
+    if (password.length < 6) {
+      setErrorMessage('รหัสผ่านต้องมีความยาวอย่างน้อย 6 ตัวอักษร');
+      return;
+    }
 
     try {
       const response = await axios.post('http://localhost:5000/api/auth/login', {
@@ -27,7 +45,7 @@ const Login = () => {
       login(decoded.user);
       navigate('/');
     } catch (err) {
-      alert(err.response?.data?.message || 'Login failed');
+      setErrorMessage(err.response?.data?.message || 'เข้าสู่ระบบไม่สำเร็จ'); // แสดงข้อความข้อผิดพลาดใน UI
     }
   };
 
@@ -44,7 +62,10 @@ const Login = () => {
               type="text"
               placeholder="กรอกชื่อผู้ใช้"
               value={username}
-              onChange={(e) => setUsername(e.target.value)}
+              onChange={(e) => {
+                setUsername(e.target.value);
+                setErrorMessage(''); // ล้างข้อความข้อผิดพลาดเมื่อมีการเปลี่ยนแปลง
+              }}
               className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
               required
             />
@@ -55,11 +76,17 @@ const Login = () => {
               type="password"
               placeholder="กรอกรหัสผ่าน"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={(e) => {
+                setPassword(e.target.value);
+                setErrorMessage(''); // ล้างข้อความข้อผิดพลาดเมื่อมีการเปลี่ยนแปลง
+              }}
               className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
               required
             />
           </div>
+          {errorMessage && ( // แสดงข้อความข้อผิดพลาดถ้ามี
+            <p className="text-red-500 text-sm text-center">{errorMessage}</p>
+          )}
           <button
             type="submit"
             className="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-lg font-semibold transition duration-200"

@@ -1,16 +1,12 @@
-const Users = require('../models/Users');
-
 exports.adminCheck = async (req, res, next) => {
     console.log('--- AdminCheck Middleware Triggered ---');
     try {
-        const { name } = req.user;
-        console.log('Checking admin access for user:', name);
+        // req.user ถูกตั้งค่าโดย auth middleware และมีข้อมูล user รวมถึง role
+        const userRole = req.user.role;
+        console.log('Checking admin access for user role:', userRole);
 
-        const adminUser = await Users.findOne({ name }).exec();
-        console.log('User found in DB:', adminUser);
-
-        if (adminUser.role !== 'admin') {
-            console.log(`Access Denied: User role is '${adminUser.role}', not 'admin'.`);
+        if (userRole !== 'admin') {
+            console.log(`Access Denied: User role is '${userRole}', not 'admin'.`);
             res.status(403).send('Admin access denied');
         } else {
             console.log('Access Granted: User is an admin.');
