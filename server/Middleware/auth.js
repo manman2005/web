@@ -15,7 +15,7 @@ exports.auth = async (req, res, next) => {
             return res.status(401).send('Malformed token');
         }
 
-        const decoded = jwt.verify(token, 'jwtsecret');
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
         console.log('Decoded user in auth middleware:', decoded.user); // เพิ่มบรรทัดนี้
         req.user = decoded.user;
         next();

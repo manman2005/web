@@ -42,7 +42,7 @@ const Login = () => {
       saveToken(token);
       
       const decoded = jwtDecode(token);
-      login(decoded.user);
+      login(decoded.user, token);
       navigate('/');
     } catch (err) {
       setErrorMessage(err.response?.data?.message || 'เข้าสู่ระบบไม่สำเร็จ'); // แสดงข้อความข้อผิดพลาดใน UI

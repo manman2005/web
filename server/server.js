@@ -6,6 +6,7 @@ const connectDB = require('./Config/db')
 const { readdirSync } = require('fs')
 const multer = require('multer');
 const path = require('path');
+require('dotenv').config();
 
 const orderRoutes = require('./Routes/order'); // Import order routes
 
@@ -31,5 +32,6 @@ app.use('/uploads', express.static('uploads'));  // <-- ใช้ bodyParser ต
 app.use('/api/products', require('./Routes/product'));
 app.use('/api/auth', require('./Routes/auth'));
 app.use('/api', orderRoutes); // Use order routes
+app.use('/api/products', require('./Routes/review'));
 
 app.listen(5000, () => console.log('Server is Runing  port 5000'))
