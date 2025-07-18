@@ -34,6 +34,7 @@ const AdminDashboard = () => {
   const [editingProduct, setEditingProduct] = useState(null);
   const [productForm, setProductForm] = useState({ name: '', price: 0, quantity: 0, detail: '', category: '', brand: '', images: [] });
   const [selectedFiles, setSelectedFiles] = useState([]);
+  const [imagesToDelete, setImagesToDelete] = useState([]); // New state for images to delete
   const [userSearch, setUserSearch] = useState('');
   const [productSearch, setProductSearch] = useState('');
   const [orderSearch, setOrderSearch] = useState('');
@@ -170,6 +171,15 @@ const AdminDashboard = () => {
       images: product.images || [],
     });
     setSelectedFiles([]);
+    setImagesToDelete([]); // Reset images to delete when editing a new product
+  };
+
+  const handleDeleteImage = (imageUrl) => {
+    setImagesToDelete(prev => [...prev, imageUrl]);
+    setProductForm(prev => ({
+      ...prev,
+      images: prev.images.filter(img => img.url !== imageUrl)
+    }));
   };
 
   const handleImageChange = (e) => {
@@ -210,6 +220,11 @@ const AdminDashboard = () => {
         formData.append('images', file);
       });
 
+      // Append imagesToDelete to formData
+      if (imagesToDelete.length > 0) {
+        formData.append('imagesToDelete', JSON.stringify(imagesToDelete));
+      }
+
       await axios.put(
         `http://localhost:5000/api/products/${editingProduct._id}`,
         formData,
@@ -223,6 +238,7 @@ const AdminDashboard = () => {
       setEditingProduct(null);
       setProductForm({ name: '', price: 0, quantity: 0, detail: '', category: '', brand: '', images: [] });
       setSelectedFiles([]);
+      setImagesToDelete([]); // Clear imagesToDelete after successful update
       fetchProducts();
     } catch (error) {
       console.error('Error updating product:', error.response ? error.response.data : error.message);
@@ -860,7 +876,28 @@ const AdminDashboard = () => {
                   <label className="block text-gray-700 text-sm font-bold mb-2">รูปภาพปัจจุบัน:</label>
                   <div className="flex flex-wrap gap-2">
                     {productForm.images.map((img, index) => (
-                      <img key={index} src={`http://localhost:5000${img.url}`} alt={`Product Image ${index + 1}`} className="w-20 h-20 object-cover rounded-md" />
+                      <div key={index} className="relative w-20 h-20">
+                        <img src={`http://localhost:5000${img.url}`} alt={`Product Image ${index + 1}`} className="w-full h-full object-cover rounded-md" />
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteImage(img.url)}
+                          className="absolute top-0 right-0 bg-red-500 text-white rounded-full p-1 text-xs leading-none flex items-center justify-center transform translate-x-1/2 -translate-y-1/2 focus:outline-none"
+                          style={{ width: '20px', height: '20px' }}
+                        >
+                          <FiXCircle />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {/* Display newly selected files */}
+              {selectedFiles.length > 0 && (
+                <div className="mb-4">
+                  <label className="block text-gray-700 text-sm font-bold mb-2">รูปภาพใหม่:</label>
+                  <div className="flex flex-wrap gap-2">
+                    {selectedFiles.map((file, index) => (
+                      <img key={index} src={URL.createObjectURL(file)} alt={`New Image ${index + 1}`} className="w-20 h-20 object-cover rounded-md" />
                     ))}
                   </div>
                 </div>

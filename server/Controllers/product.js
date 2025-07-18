@@ -1,5 +1,7 @@
 const product = require ('../models/product')
 const mongoose = require('mongoose');
+const fs = require('fs');
+const path = require('path');
 exports.read = async (req, res) => {
     try {
         const id = req.params.id;
@@ -98,7 +100,7 @@ exports.create = async (req, res) => {
 exports.update = async (req, res) => {
     try {
         const id = req.params.id;
-        const { name, detail, category, brand } = req.body;
+        const { name, detail, category, brand, imagesToDelete } = req.body;
         let { price, quantity } = req.body;
 
         console.log('Received price (before conversion):', price, 'Type:', typeof price);
@@ -153,16 +155,36 @@ exports.update = async (req, res) => {
             updateData.quantity = quantity;
         }
 
-        // If no fields are provided for update, return an error or just proceed without updating anything
-        if (Object.keys(updateData).length === 0 && (!req.files || req.files.length === 0)) {
-            return res.status(400).send('ไม่มีข้อมูลที่ต้องการอัปเดต');
+        // Handle image deletion
+        if (imagesToDelete && imagesToDelete.length > 0) {
+            const existingProduct = await product.findById(id).exec();
+            if (existingProduct) {
+                let currentImages = existingProduct.images.map(img => img.url);
+                const imagesToKeep = currentImages.filter(url => !imagesToDelete.includes(url));
+
+                for (const imageUrl of imagesToDelete) {
+                    const filename = path.basename(imageUrl);
+                    const filePath = path.join(__dirname, '..', 'uploads', filename);
+                    fs.unlink(filePath, (err) => {
+                        if (err) console.error(`Error deleting file ${filePath}:`, err);
+                        else console.log(`Successfully deleted file: ${filePath}`);
+                    });
+                }
+                updateData.images = imagesToKeep.map(url => ({ url }));
+            }
         }
 
+        // Handle new image uploads
         if (req.files && req.files.length > 0) {
             const existingProduct = await product.findById(id).exec();
             const existingImages = existingProduct ? existingProduct.images : [];
             const newImages = req.files.map(file => ({ url: `/uploads/${file.filename}` }));
             updateData.images = [...existingImages, ...newImages];
+        }
+
+        // If no fields are provided for update, return an error or just proceed without updating anything
+        if (Object.keys(updateData).length === 0 && (!req.files || req.files.length === 0)) {
+            return res.status(400).send('ไม่มีข้อมูลที่ต้องการอัปเดต');
         }
 
         const updatedProduct = await product.findByIdAndUpdate(id, updateData, {
