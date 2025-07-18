@@ -40,13 +40,13 @@ exports.create = async (req, res) => {
     const { name, detail, price, category, brand, quantity } = req.body;
 
     // Input Validation
-    if (!name || !detail || !category || !brand) {
-      return res.status(400).send('กรุณากรอกข้อมูลสินค้าให้ครบถ้วน (ชื่อ, รายละเอียด, หมวดหมู่, แบรนด์)');
+    if (!name) {
+      return res.status(400).send('กรุณากรอกชื่อสินค้า');
     }
-    if (typeof price !== 'number' || price < 0) {
+    if (price !== undefined && (typeof price !== 'number' || price < 0)) {
       return res.status(400).send('ราคาต้องเป็นตัวเลขและไม่ติดลบ');
     }
-    if (typeof quantity !== 'number' || quantity < 0) {
+    if (quantity !== undefined && (typeof quantity !== 'number' || quantity < 0)) {
       return res.status(400).send('จำนวนสินค้าต้องเป็นตัวเลขและไม่ติดลบ');
     }
 
@@ -76,36 +76,71 @@ exports.create = async (req, res) => {
 exports.update = async (req, res) => {
     try {
         const id = req.params.id;
-        const { name, detail, price, category, brand, quantity } = req.body;
+        const { name, detail, category, brand } = req.body;
+        let { price, quantity } = req.body;
 
-        // Input Validation for update
-        if (name !== undefined && typeof name !== 'string' || (typeof name === 'string' && name.trim() === '')) {
-            return res.status(400).send('ชื่อสินค้าไม่ถูกต้อง');
+        console.log('Received price (before conversion):', price, 'Type:', typeof price);
+        console.log('Received quantity (before conversion):', quantity, 'Type:', typeof quantity);
+
+        if (price !== undefined) {
+            price = Number(price);
         }
-        if (detail !== undefined && typeof detail !== 'string' || (typeof detail === 'string' && detail.trim() === '')) {
-            return res.status(400).send('รายละเอียดสินค้าไม่ถูกต้อง');
-        }
-        if (category !== undefined && typeof category !== 'string' || (typeof category === 'string' && category.trim() === '')) {
-            return res.status(400).send('หมวดหมู่สินค้าไม่ถูกต้อง');
-        }
-        if (brand !== undefined && typeof brand !== 'string' || (typeof brand === 'string' && brand.trim() === '')) {
-            return res.status(400).send('แบรนด์สินค้าไม่ถูกต้อง');
-        }
-        if (price !== undefined && (typeof price !== 'number' || price < 0)) {
-            return res.status(400).send('ราคาต้องเป็นตัวเลขและไม่ติดลบ');
-        }
-        if (quantity !== undefined && (typeof quantity !== 'number' || quantity < 0)) {
-            return res.status(400).send('จำนวนสินค้าต้องเป็นตัวเลขและไม่ติดลบ');
+        if (quantity !== undefined) {
+            quantity = Number(quantity);
         }
 
-        let updateData = { name, detail, price, category, brand, quantity };
+        console.log('Received price (after conversion):', price, 'Type:', typeof price);
+        console.log('Received quantity (after conversion):', quantity, 'Type:', typeof quantity);
 
-        // Remove undefined fields from updateData
-        Object.keys(updateData).forEach(key => updateData[key] === undefined && delete updateData[key]);
+        let updateData = {};
+
+        if (name !== undefined) {
+            if (typeof name !== 'string' || name.trim() === '') {
+                return res.status(400).send('ชื่อสินค้าไม่ถูกต้อง');
+            }
+            updateData.name = name;
+        }
+        if (detail !== undefined) {
+            if (typeof detail !== 'string') {
+                return res.status(400).send('รายละเอียดสินค้าไม่ถูกต้อง (ต้องเป็นข้อความ)');
+            }
+            updateData.detail = detail;
+        }
+        if (category !== undefined) {
+            if (typeof category !== 'string') {
+                return res.status(400).send('หมวดหมู่สินค้าไม่ถูกต้อง (ต้องเป็นข้อความ)');
+            }
+            updateData.category = category;
+        }
+        if (brand !== undefined) {
+            if (typeof brand !== 'string') {
+                return res.status(400).send('แบรนด์สินค้าไม่ถูกต้อง (ต้องเป็นข้อความ)');
+            }
+            updateData.brand = brand;
+        }
+        if (price !== undefined) {
+            if (typeof price !== 'number' || price < 0) {
+                return res.status(400).send('ราคาต้องเป็นตัวเลขและไม่ติดลบ');
+            }
+            updateData.price = price;
+        }
+        if (quantity !== undefined) {
+            if (typeof quantity !== 'number' || quantity < 0) {
+                return res.status(400).send('จำนวนสินค้าต้องเป็นตัวเลขและไม่ติดลบ');
+            }
+            updateData.quantity = quantity;
+        }
+
+        // If no fields are provided for update, return an error or just proceed without updating anything
+        if (Object.keys(updateData).length === 0 && (!req.files || req.files.length === 0)) {
+            return res.status(400).send('ไม่มีข้อมูลที่ต้องการอัปเดต');
+        }
 
         if (req.files && req.files.length > 0) {
+            const existingProduct = await product.findById(id).exec();
+            const existingImages = existingProduct ? existingProduct.images : [];
             const newImages = req.files.map(file => ({ url: `/uploads/${file.filename}` }));
-            updateData.images = newImages;
+            updateData.images = [...existingImages, ...newImages];
         }
 
         const updatedProduct = await product.findByIdAndUpdate(id, updateData, {

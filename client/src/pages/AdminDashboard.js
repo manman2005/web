@@ -32,14 +32,14 @@ const AdminDashboard = () => {
   const [editingUser, setEditingUser] = useState(null);
   const [userForm, setUserForm] = useState({ name: '', role: '' });
   const [editingProduct, setEditingProduct] = useState(null);
-  const [productForm, setProductForm] = useState({ name: '', price: 0, quantity: 0, description: '', category: '', brand: '', images: [] });
+  const [productForm, setProductForm] = useState({ name: '', price: 0, quantity: 0, detail: '', category: '', brand: '', images: [] });
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [userSearch, setUserSearch] = useState('');
   const [productSearch, setProductSearch] = useState('');
   const [orderSearch, setOrderSearch] = useState('');
   const [addingProduct, setAddingProduct] = useState(false);
   const [addProductForm, setAddProductForm] = useState({
-    name: '', price: 0, quantity: 0, description: '', category: '', brand: '', images: []
+    name: '', price: 0, quantity: 0, detail: '', category: '', brand: '', images: []
   });
   const [addSelectedFiles, setAddSelectedFiles] = useState([]);
   const [activeTab, setActiveTab] = useState('overview');
@@ -161,13 +161,13 @@ const AdminDashboard = () => {
   const handleEditProduct = (product) => {
     setEditingProduct(product);
     setProductForm({
-      name: product.name,
-      price: product.price,
-      quantity: product.quantity,
-      description: product.description,
-      category: product.category,
-      brand: product.brand,
-      images: product.images,
+      name: product.name || '',
+      price: product.price || 0,
+      quantity: product.quantity || 0,
+      detail: product.detail || '',
+      category: product.category || '',
+      brand: product.brand || '',
+      images: product.images || [],
     });
     setSelectedFiles([]);
   };
@@ -187,9 +187,24 @@ const AdminDashboard = () => {
       const token = getToken();
       const formData = new FormData();
       for (const key in productForm) {
-        if (key !== 'images') {
-          formData.append(key, productForm[key]);
+        if (key === 'images') {
+          continue;
         }
+
+        let value = productForm[key];
+
+        if (key === 'price' || key === 'quantity') {
+          if (value === '') {
+            value = 0; // Treat empty string as 0
+          } else {
+            value = Number(value);
+            if (isNaN(value)) {
+              console.warn(`Invalid number for ${key}: ${productForm[key]}. Setting to 0.`);
+              value = 0;
+            }
+          }
+        }
+        formData.append(key, value);
       }
       selectedFiles.forEach((file) => {
         formData.append('images', file);
@@ -206,11 +221,11 @@ const AdminDashboard = () => {
         }
       );
       setEditingProduct(null);
-      setProductForm({ name: '', price: 0, quantity: 0, description: '', category: '', brand: '', images: [] });
+      setProductForm({ name: '', price: 0, quantity: 0, detail: '', category: '', brand: '', images: [] });
       setSelectedFiles([]);
       fetchProducts();
     } catch (error) {
-      console.error('Error updating product:', error);
+      console.error('Error updating product:', error.response ? error.response.data : error.message);
     }
   };
 
@@ -243,9 +258,23 @@ const AdminDashboard = () => {
       const token = getToken();
       const formData = new FormData();
       for (const key in addProductForm) {
-        if (key !== 'images') {
-          formData.append(key, addProductForm[key]);
+        if (key === 'images') {
+          continue;
         }
+
+        let value = addProductForm[key];
+
+        if (key === 'price' || key === 'quantity') {
+          if (value === '') {
+            continue;
+          }
+          value = Number(value);
+          if (isNaN(value)) {
+            console.warn(`Invalid number for ${key}: ${addProductForm[key]}`);
+            continue;
+          }
+        }
+        formData.append(key, value);
       }
       addSelectedFiles.forEach((file) => {
         formData.append('images', file);
@@ -257,7 +286,7 @@ const AdminDashboard = () => {
         },
       });
       setAddingProduct(false);
-      setAddProductForm({ name: '', price: 0, quantity: 0, description: '', category: '', brand: '', images: [] });
+      setAddProductForm({ name: '', price: 0, quantity: 0, detail: '', category: '', brand: '', images: [] });
       setAddSelectedFiles([]);
       fetchProducts();
     } catch (error) {
@@ -803,11 +832,11 @@ const AdminDashboard = () => {
                 </div>
               </div>
               <div className="mb-4">
-                <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="productDescription">รายละเอียด</label>
+                <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="productDetail">รายละเอียด</label>
                 <textarea
-                  id="productDescription"
-                  name="description"
-                  value={productForm.description}
+                  id="productDetail"
+                  name="detail"
+                  value={productForm.detail}
                   onChange={handleProductFormChange}
                   rows="3"
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
@@ -924,11 +953,11 @@ const AdminDashboard = () => {
                 </div>
               </div>
               <div className="mb-4">
-                <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="productDescription">รายละเอียด</label>
+                <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="productDetail">รายละเอียด</label>
                 <textarea
-                  id="productDescription"
-                  name="description"
-                  value={addProductForm.description}
+                  id="productDetail"
+                  name="detail"
+                  value={addProductForm.detail}
                   onChange={handleAddProductFormChange}
                   rows="3"
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
