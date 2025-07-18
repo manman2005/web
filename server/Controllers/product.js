@@ -27,11 +27,14 @@ exports.read = async (req, res) => {
 
 exports.list = async (req, res) => {
     try {
-        const { search } = req.query;
+        const { search, category } = req.query;
         let query = {};
 
         if (search) {
             query.name = { $regex: search, $options: 'i' };
+        }
+        if (category) {
+            query.category = category;
         }
 
         const products = await product.find(query).exec();

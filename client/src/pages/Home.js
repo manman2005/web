@@ -5,14 +5,20 @@ import CategoryBar from '../components/CategoryBar';
 import ProductList from '../components/ProductList';
 
 const Home = ({ search }) => {
+  const [selectedCategory, setSelectedCategory] = useState(null);
+
+  const handleSelectCategory = (category) => {
+    setSelectedCategory(category);
+  };
+
   return (
     <div className="bg-gray-100 min-h-screen">
       <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <Banner />
-        <CategoryBar />
+        <CategoryBar onSelectCategory={handleSelectCategory} />
         <div className="mt-8">
           <h2 className="text-2xl font-bold text-gray-800 mb-4 px-4 sm:px-0">สินค้าแนะนำ</h2>
-          <ProductList search={search} />
+          <ProductList search={search} category={selectedCategory} />
         </div>
       </div>
     </div>

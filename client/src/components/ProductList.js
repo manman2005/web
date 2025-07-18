@@ -5,7 +5,7 @@ import { FaStar } from 'react-icons/fa';
 import { CartContext } from '../context/CartContext';
 import { AuthContext } from '../context/AuthContext';
 
-const ProductList = ({ onSelectProduct, search }) => {
+const ProductList = ({ onSelectProduct, search, category }) => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -20,8 +20,13 @@ const ProductList = ({ onSelectProduct, search }) => {
     const CancelToken = axios.CancelToken;
     const source = CancelToken.source();
 
+    let apiUrl = `http://localhost:5000/api/products?search=${search}`;
+    if (category) {
+      apiUrl += `&category=${category}`;
+    }
+
     axios
-      .get(`http://localhost:5000/api/products?search=${search}`)
+      .get(apiUrl)
       .then((res) => {
         setProducts(res.data);
         setLoading(false);
@@ -39,7 +44,7 @@ const ProductList = ({ onSelectProduct, search }) => {
     return () => {
       source.cancel('Operation canceled by the user.');
     };
-  }, [search]);
+  }, [search, category]);
 
   const handleAddToCart = (product) => {
     if (!isAuthenticated) {
