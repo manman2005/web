@@ -95,6 +95,9 @@ const ProductDetail = () => {
         <div className="w-full md:w-1/2 p-6 flex flex-col justify-between">
           <div>
             <h1 className="text-3xl font-bold text-gray-900 mb-2">{product.name}</h1>
+            {product.lowStockAlert && (
+              <p className="text-red-500 font-semibold mb-2">* สินค้าใกล้หมดแล้ว!</p>
+            )}
             <div className="flex items-center mb-4">
               <div className="flex text-yellow-400 mr-2">
                 <FaStar />

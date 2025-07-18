@@ -69,9 +69,14 @@ const ProductList = ({ onSelectProduct, search }) => {
         <div
           key={product._id}
           onClick={() => navigate(`/products/${product._id}`)}
-          className="bg-white rounded-sm shadow-sm hover:shadow-md transition-shadow cursor-pointer flex flex-col overflow-hidden"
+          className={`bg-white rounded-sm shadow-sm hover:shadow-md transition-shadow cursor-pointer flex flex-col overflow-hidden ${product.lowStockAlert ? 'border-2 border-red-500' : ''}`}
         >
-          <div className="w-full aspect-square overflow-hidden">
+          <div className="w-full aspect-square overflow-hidden relative">
+            {product.lowStockAlert && (
+              <div className="absolute top-0 left-0 bg-red-500 text-white text-xs px-2 py-1 rounded-br-sm z-10">
+                สินค้าใกล้หมด!
+              </div>
+            )}
             <img
               src={
                 product.images && product.images.length > 0

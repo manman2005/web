@@ -12,7 +12,13 @@ exports.read = async (req, res) => {
             return res.status(404).send('Product not found');
         }
 
-        res.json(oneProduct);
+        const LOW_STOCK_THRESHOLD = 10; // กำหนดเกณฑ์สินค้าใกล้หมด
+        const productWithAlert = {
+            ...oneProduct.toObject(),
+            lowStockAlert: oneProduct.quantity !== undefined && oneProduct.quantity < LOW_STOCK_THRESHOLD
+        };
+
+        res.json(productWithAlert);
     } catch (err) {
         console.log(err);
         res.status(500).send('server error');
@@ -29,7 +35,12 @@ exports.list = async (req, res) => {
         }
 
         const products = await product.find(query).exec();
-        res.json(products);
+        const LOW_STOCK_THRESHOLD = 10; // กำหนดเกณฑ์สินค้าใกล้หมด
+        const productsWithAlert = products.map(p => ({
+            ...p.toObject(),
+            lowStockAlert: p.quantity !== undefined && p.quantity < LOW_STOCK_THRESHOLD
+        }));
+        res.json(productsWithAlert);
     } catch (err) {
         console.log(err);
         res.status(500).send('server error');
