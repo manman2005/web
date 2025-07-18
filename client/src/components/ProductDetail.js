@@ -113,7 +113,7 @@ const ProductDetail = () => {
               ฿{product.price}
             </div>
 
-            <p className="text-gray-700 mb-4 leading-relaxed">{product.description}</p>
+            <p className="text-gray-700 mb-4 leading-relaxed">{product.detail || 'ไม่มีรายละเอียดสินค้า'}</p>
 
             <div className="mb-4">
               <span className="font-semibold text-gray-800">หมวดหมู่: </span>
