@@ -266,12 +266,13 @@ const AdminDashboard = () => {
 
         if (key === 'price' || key === 'quantity') {
           if (value === '') {
-            continue;
-          }
-          value = Number(value);
-          if (isNaN(value)) {
-            console.warn(`Invalid number for ${key}: ${addProductForm[key]}`);
-            continue;
+            value = 0; // Set to 0 if empty
+          } else {
+            value = Number(value);
+            if (isNaN(value)) {
+              console.warn(`Invalid number for ${key}: ${addProductForm[key]}`);
+              value = 0; // Set to 0 if NaN
+            }
           }
         }
         formData.append(key, value);
@@ -290,7 +291,7 @@ const AdminDashboard = () => {
       setAddSelectedFiles([]);
       fetchProducts();
     } catch (error) {
-      console.error('Error adding product:', error);
+      console.error('Error adding product:', error.response ? error.response.data : error.message);
     }
   };
 

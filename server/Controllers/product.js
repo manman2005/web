@@ -37,7 +37,15 @@ exports.list = async (req, res) => {
 }
 exports.create = async (req, res) => {
   try {
-    const { name, detail, price, category, brand, quantity } = req.body;
+    let { name, detail, price, category, brand, quantity } = req.body;
+
+    // Convert price and quantity to numbers if they exist
+    if (price !== undefined) {
+      price = Number(price);
+    }
+    if (quantity !== undefined) {
+      quantity = Number(quantity);
+    }
 
     // Input Validation
     if (!name) {
