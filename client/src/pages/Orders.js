@@ -23,7 +23,9 @@ const Orders = () => {
             Authorization: `Bearer ${token}`,
           },
         });
-        setOrders(response.data);
+        // Sort orders by createdAt in descending order (latest first)
+        const sortedOrders = response.data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        setOrders(sortedOrders);
       } catch (err) {
         console.error('Error fetching orders:', err);
         setError('ไม่สามารถดึงข้อมูลคำสั่งซื้อได้');
