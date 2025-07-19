@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Banner from '../components/Banner';
+import PromoBanners from '../components/PromoBanners';
 import CategoryBar from '../components/CategoryBar';
 import ProductList from '../components/ProductList';
 
@@ -14,7 +15,12 @@ const Home = ({ search }) => {
   return (
     <div className="bg-gray-100 min-h-screen">
       <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        <Banner />
+        <div className="mb-8">
+          <Banner />
+        </div>
+        <div className="mb-8">
+          <PromoBanners />
+        </div>
         <CategoryBar onSelectCategory={handleSelectCategory} />
         <div className="mt-8">
           <h2 className="text-2xl font-bold text-gray-800 mb-4 px-4 sm:px-0">สินค้าแนะนำ</h2>
