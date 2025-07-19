@@ -5,7 +5,7 @@ import { FaStar } from 'react-icons/fa';
 import { CartContext } from '../context/CartContext';
 import { AuthContext } from '../context/AuthContext';
 
-const ProductList = ({ onSelectProduct, search, category }) => {
+const ProductList = ({ onSelectProduct, search, category, brand }) => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -23,6 +23,9 @@ const ProductList = ({ onSelectProduct, search, category }) => {
     let apiUrl = `http://localhost:5000/api/products?search=${search}`;
     if (category) {
       apiUrl += `&category=${category}`;
+    }
+    if (brand) {
+      apiUrl += `&brand=${brand}`;
     }
 
     axios
@@ -44,7 +47,7 @@ const ProductList = ({ onSelectProduct, search, category }) => {
     return () => {
       source.cancel('Operation canceled by the user.');
     };
-  }, [search, category]);
+  }, [search, category, brand]);
 
   const handleAddToCart = (product) => {
     if (!isAuthenticated) {

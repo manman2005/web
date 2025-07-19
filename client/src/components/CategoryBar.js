@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { FiChevronDown, FiChevronUp } from 'react-icons/fi';
 
 const DEFAULT_CATEGORIES = [
   'ความงามและของใช้ส่วนตัว',
@@ -24,8 +25,11 @@ const DEFAULT_CATEGORIES = [
   'เกมและอุปกรณ์เสริม',
 ];
 
+const INITIAL_DISPLAY_COUNT = 20; // Display 2 rows on md:grid-cols-10
+
 const CategoryBar = ({ onSelectCategory }) => {
   const [categories, setCategories] = useState([]);
+  const [isExpanded, setIsExpanded] = useState(false);
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -41,11 +45,13 @@ const CategoryBar = ({ onSelectCategory }) => {
     fetchCategories();
   }, []);
 
+  const displayedCategories = isExpanded ? categories : categories.slice(0, INITIAL_DISPLAY_COUNT);
+
   return (
     <div className="bg-white rounded-xl shadow p-6 mb-8">
       <h3 className="text-lg font-semibold mb-4">หมวดหมู่</h3>
       <div className="grid grid-cols-3 sm:grid-cols-5 md:grid-cols-10 gap-4">
-        {categories.map((cat) => (
+        {displayedCategories.map((cat) => (
           <div
             key={cat}
             onClick={() => onSelectCategory(cat)}
@@ -59,6 +65,18 @@ const CategoryBar = ({ onSelectCategory }) => {
           </div>
         ))}
       </div>
+      {categories.length > INITIAL_DISPLAY_COUNT && (
+        <button
+          onClick={() => setIsExpanded(!isExpanded)}
+          className="mt-4 w-full flex items-center justify-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors"
+        >
+          {isExpanded ? (
+            <><FiChevronUp /> ย่อ</>
+          ) : (
+            <><FiChevronDown /> ดูเพิ่มเติม</>
+          )}
+        </button>
+      )}
     </div>
   );
 };
