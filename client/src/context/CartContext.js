@@ -1,5 +1,7 @@
 import React, { createContext, useState } from 'react';
 
+import { toast } from 'react-toastify';
+
 export const CartContext = createContext();
 
 export const CartProvider = ({ children }) => {
@@ -11,7 +13,7 @@ export const CartProvider = ({ children }) => {
     if (exists) {
       const newQuantity = exists.quantity + quantity;
       if (newQuantity > exists.stock) {
-        alert(`ไม่สามารถเพิ่มสินค้าเกินจำนวนในสต็อกได้ (มีอยู่ ${exists.stock} ชิ้นในสต็อก และ ${exists.quantity} ในตะกร้าแล้ว)`);
+        toast.error(`ไม่สามารถเพิ่มสินค้าเกินจำนวนในสต็อกได้ (มีอยู่ ${exists.stock} ชิ้นในสต็อก และ ${exists.quantity} ในตะกร้าแล้ว)`);
         return;
       }
       setCartItems(cartItems.map(i =>
@@ -19,7 +21,7 @@ export const CartProvider = ({ children }) => {
       ));
     } else {
       if (quantity > item.quantity) {
-        alert(`ไม่สามารถเพิ่มสินค้าเกินจำนวนในสต็อกได้ (มีอยู่ ${item.quantity} ชิ้น)`);
+        toast.error(`ไม่สามารถเพิ่มสินค้าเกินจำนวนในสต็อกได้ (มีอยู่ ${item.quantity} ชิ้น)`);
         return;
       }
       const newItem = {
@@ -42,7 +44,7 @@ export const CartProvider = ({ children }) => {
     setCartItems(cartItems.map(i => {
       if (i._id === id) {
         if (i.quantity >= i.stock) {
-          alert(`สินค้ามีในสต็อกเพียง ${i.stock} ชิ้น`);
+          toast.warn(`สินค้ามีในสต็อกเพียง ${i.stock} ชิ้น`);
           return i;
         }
         return { ...i, quantity: i.quantity + 1 };

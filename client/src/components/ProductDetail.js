@@ -5,6 +5,8 @@ import { CartContext } from '../context/CartContext';
 import { AuthContext } from '../context/AuthContext';
 import { FaStar } from 'react-icons/fa';
 
+import { toast } from 'react-toastify';
+
 const Rating = ({ value, text, color = '#fde047' }) => {
   return (
     <div className="flex items-center">
@@ -60,13 +62,13 @@ const ProductDetail = () => {
 
   const handleAddToCart = () => {
     if (!isAuthenticated) {
-      alert('กรุณาเข้าสู่ระบบก่อนเพิ่มสินค้าในตะกร้า');
+      toast.error('กรุณาเข้าสู่ระบบก่อนเพิ่มสินค้าในตะกร้า');
       navigate('/login');
       return;
     }
     if (product && quantity > 0) {
       addToCart(product, quantity);
-      alert('เพิ่มสินค้าลงในตะกร้าแล้ว!');
+      toast.success('เพิ่มสินค้าลงในตะกร้าแล้ว!');
     }
   };
 
@@ -76,7 +78,7 @@ const ProductDetail = () => {
     if (value > 0 && value <= maxQty) {
       setQuantity(value);
     } else if (value > maxQty) {
-      alert(`สินค้ามีในสต็อกเพียง ${maxQty} ชิ้น`);
+      toast.warn(`สินค้ามีในสต็อกเพียง ${maxQty} ชิ้น`);
       setQuantity(maxQty);
     } else {
       setQuantity(1);
@@ -98,7 +100,7 @@ const ProductDetail = () => {
       setLoadingProductReview(false);
       setRating(0);
       setComment('');
-      alert('ขอบคุณสำหรับรีวิวครับ!');
+      toast.success('ขอบคุณสำหรับรีวิวครับ!');
       fetchProduct(); 
     } catch (error) {
       const message = error.response && error.response.data.message ? error.response.data.message : error.message;

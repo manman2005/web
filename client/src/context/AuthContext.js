@@ -38,6 +38,33 @@ export const AuthProvider = ({ children }) => {
     setIsAuthReady(true);
   }, []);
 
+  const checkAuth = () => {
+    const storedToken = getToken();
+    if (storedToken) {
+      try {
+        const decoded = jwtDecode(storedToken);
+        if (decoded && decoded.user) {
+          setIsAuthenticated(true);
+          setUser(decoded.user);
+          setToken(storedToken);
+        } else {
+          setIsAuthenticated(false);
+          setUser(null);
+          setToken(null);
+        }
+      } catch (error) {
+        console.error("Error decoding token:", error);
+        setIsAuthenticated(false);
+        setUser(null);
+        setToken(null);
+      }
+    } else {
+      setIsAuthenticated(false);
+      setUser(null);
+      setToken(null);
+    }
+  };
+
   const login = (userData, token) => {
     setIsAuthenticated(true);
     setUser(userData);
@@ -51,7 +78,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, user, token, login, logout, isAuthReady }}>
+    <AuthContext.Provider value={{ isAuthenticated, user, token, login, logout, isAuthReady, checkAuth }}>
       {children}
     </AuthContext.Provider>
   );

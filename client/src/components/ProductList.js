@@ -5,6 +5,8 @@ import { FaStar } from 'react-icons/fa';
 import { CartContext } from '../context/CartContext';
 import { AuthContext } from '../context/AuthContext';
 
+import { toast } from 'react-toastify';
+
 const ProductList = ({ onSelectProduct, search, category, brand }) => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -51,12 +53,12 @@ const ProductList = ({ onSelectProduct, search, category, brand }) => {
 
   const handleAddToCart = (product) => {
     if (!isAuthenticated) {
-      alert('กรุณาเข้าสู่ระบบก่อนเพิ่มสินค้าในตะกร้า');
+      toast.error('กรุณาเข้าสู่ระบบก่อนเพิ่มสินค้าในตะกร้า');
       navigate('/login');
       return;
     }
     addToCart(product);
-    alert('เพิ่มสินค้าในตะกร้าเรียบร้อยแล้ว!');
+    toast.success('เพิ่มสินค้าในตะกร้าเรียบร้อยแล้ว!');
   };
 
   if (loading) {
