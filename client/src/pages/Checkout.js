@@ -3,8 +3,11 @@ import { CartContext } from '../context/CartContext';
 import { AuthContext } from '../context/AuthContext';
 import { getToken } from '../auth/authUtils';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
 const Checkout = () => {
+  const navigate = useNavigate();
   const { cartItems, totalPrice, clearCart } = useContext(CartContext);
   const { isAuthenticated, user } = useContext(AuthContext);
 
@@ -76,8 +79,9 @@ const Checkout = () => {
           },
         }
       );
-      alert('สั่งซื้อเรียบร้อยแล้ว!');
+      toast.success('สั่งซื้อเรียบร้อยแล้ว!');
       clearCart(); // Clear cart after successful order
+      navigate('/'); // Navigate to home page
     } catch (error) {
       console.error('Error during checkout:', error);
       alert('เกิดข้อผิดพลาดในการสั่งซื้อ');
@@ -85,44 +89,77 @@ const Checkout = () => {
   };
 
   return (
-    <div className="p-4 sm:p-6 max-w-3xl mx-auto">
-      <h2 className="text-2xl font-bold mb-4">สรุปรายการสั่งซื้อ</h2>
-      <div className="space-y-4">
-        {cartItems.map(item => (
-          <div key={item._id} className="flex flex-col sm:flex-row sm:justify-between border-b pb-2">
-            <span className="w-full">{item.name} x {item.quantity}</span>
-            <span className="w-full sm:w-auto text-left sm:text-right">฿{item.price * item.quantity}</span>
-          </div>
-        ))}
-      </div>
-      <div className="mt-4 text-right text-lg font-semibold">
-        รวมทั้งหมด: ฿{totalPrice}
-      </div>
+    <div className="min-h-screen bg-gray-100 p-4 sm:p-6 lg:p-8">
+      <div className="max-w-6xl mx-auto bg-white p-6 rounded-lg shadow-lg">
+        <h2 className="text-3xl font-bold text-gray-800 mb-6 text-center">ดำเนินการสั่งซื้อ</h2>
 
-      <form className="mt-6 space-y-3">
-        <textarea
-          className="w-full border p-2 rounded"
-          placeholder="ที่อยู่จัดส่ง"
-          value={shippingAddress}
-          onChange={(e) => setShippingAddress(e.target.value)}
-          required
-        ></textarea>
-        <input
-          className="w-full border p-2 rounded"
-          type="tel"
-          placeholder="เบอร์โทรศัพท์"
-          value={phoneNumber}
-          onChange={(e) => setPhoneNumber(e.target.value)}
-          required
-        />
-        <button
-          type="button"
-          onClick={handleCheckout}
-          className="w-full bg-green-500 text-white p-2 rounded mt-4"
-        >
-          ยืนยันการสั่งซื้อ
-        </button>
-      </form>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          {/* Order Summary Section */}
+          <div className="bg-gray-50 p-6 rounded-lg shadow-inner">
+            <h3 className="text-2xl font-semibold text-gray-700 mb-4">สรุปรายการสั่งซื้อ</h3>
+            {cartItems.length === 0 ? (
+              <p className="text-gray-600">ไม่มีสินค้าในตะกร้า</p>
+            ) : (
+              <div className="space-y-4">
+                {cartItems.map(item => (
+                  <div key={item._id} className="flex justify-between items-center border-b border-gray-200 pb-2">
+                    <span className="text-gray-700 text-lg">{item.name} x {item.quantity}</span>
+                    <span className="text-gray-800 font-medium text-lg">฿{(item.price * item.quantity).toFixed(2)}</span>
+                  </div>
+                ))}
+                <div className="pt-4 border-t-2 border-gray-300 flex justify-between items-center">
+                  <span className="text-xl font-bold text-gray-800">รวมทั้งหมด:</span>
+                  <span className="text-2xl font-extrabold text-indigo-600">฿{totalPrice.toFixed(2)}</span>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Shipping Address and Payment Section */}
+          <div className="bg-gray-50 p-6 rounded-lg shadow-inner">
+            <h3 className="text-2xl font-semibold text-gray-700 mb-4">ที่อยู่จัดส่งและเบอร์โทรศัพท์</h3>
+            <form className="space-y-4">
+              <div>
+                <label htmlFor="shippingAddress" className="block text-gray-700 text-sm font-bold mb-2">
+                  ที่อยู่จัดส่ง:
+                </label>
+                <textarea
+                  id="shippingAddress"
+                  className="w-full border border-gray-300 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-200"
+                  placeholder="กรอกที่อยู่จัดส่งของคุณ"
+                  value={shippingAddress}
+                  onChange={(e) => setShippingAddress(e.target.value)}
+                  rows="4"
+                  required
+                ></textarea>
+              </div>
+              <div>
+                <label htmlFor="phoneNumber" className="block text-gray-700 text-sm font-bold mb-2">
+                  เบอร์โทรศัพท์:
+                </label>
+                <input
+                  id="phoneNumber"
+                  className="w-full border border-gray-300 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-200"
+                  type="tel"
+                  placeholder="กรอกเบอร์โทรศัพท์ของคุณ"
+                  value={phoneNumber}
+                  onChange={(e) => setPhoneNumber(e.target.value)}
+                  required
+                />
+              </div>
+              <div className="flex justify-end">
+                <button
+                  type="button"
+                  onClick={handleCheckout}
+                  className="w-1/2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-lg transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50"
+                >
+                  ยืนยันการสั่งซื้อ
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
