@@ -42,47 +42,69 @@ const Cart = () => {
   }
 
   return (
-    <div className="p-4 sm:p-6 max-w-4xl mx-auto">
-      <h2 className="text-2xl font-bold mb-4">ตะกร้าสินค้า</h2>
-      <div className="space-y-4">
-        {cartItems.map(item => (
-          <div key={item._id} className="flex flex-col sm:flex-row sm:justify-between sm:items-center border-b pb-2">
-            <div className="flex items-center">
-              <img src={`http://localhost:5000${item.image}`} alt={item.name} className="w-16 h-16 object-cover rounded-md mr-4" />
-              <div className="w-full">
-                <p className="font-semibold">{item.name}</p>
-                <p>ราคา: ฿{item.price}</p>
-                <div className="flex gap-2 mt-1">
-                  <button onClick={() => decreaseQty(item._id)} className="px-2 bg-gray-200 rounded">−</button>
-                  <span>{item.quantity}</span>
-                  <button onClick={() => increaseQty(item._id)} className="px-2 bg-gray-200 rounded">+</button>
-                </div>
-              </div>
-            </div>
-            <div className="w-full sm:w-auto text-left sm:text-right mt-2 sm:mt-0">
-              <p>รวม: ฿{item.price * item.quantity}</p>
-              <button
-                onClick={() => removeFromCart(item._id)}
-                className="text-red-500 mt-2"
-              >
-                ลบ
-              </button>
-            </div>
+    <div className="min-h-screen bg-gray-100 p-4 sm:p-6 lg:p-8">
+      <div className="max-w-6xl mx-auto bg-white p-6 rounded-xl shadow-lg">
+        <h2 className="text-3xl font-bold text-gray-800 mb-6 text-center">ตะกร้าสินค้า</h2>
+
+        {cartItems.length === 0 ? (
+          <div className="text-center py-10">
+            <p className="text-gray-600 text-xl mb-6">ยังไม่มีสินค้าในตะกร้า</p>
+            <Link
+              to="/"
+              className="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3 rounded-lg font-semibold transition duration-200 transform hover:scale-105 inline-block"
+            >
+              เลือกซื้อสินค้า
+            </Link>
           </div>
-        ))}
-      </div>
+        ) : (
+          <>
+            <div className="space-y-6">
+              {cartItems.map(item => (
+                <div key={item._id} className="flex flex-col sm:flex-row items-center bg-gray-50 p-4 rounded-lg shadow-sm space-y-4 sm:space-y-0 sm:space-x-4">
+                  <img src={`http://localhost:5000${item.image}`} alt={item.name} className="w-24 h-24 object-cover rounded-md flex-shrink-0" />
+                  <div className="flex-grow">
+                    <p className="font-semibold text-lg text-gray-800">{item.name}</p>
+                    <p className="text-gray-600">ราคา: ฿{item.price.toFixed(2)}</p>
+                    <div className="flex items-center space-x-2 mt-2">
+                      <button
+                        onClick={() => decreaseQty(item._id)}
+                        className="bg-gray-200 hover:bg-gray-300 text-gray-700 px-3 py-1 rounded-md transition duration-200"
+                      >
+                        −
+                      </button>
+                      <span className="font-medium text-gray-800">{item.quantity}</span>
+                      <button
+                        onClick={() => increaseQty(item._id)}
+                        className="bg-gray-200 hover:bg-gray-300 text-gray-700 px-3 py-1 rounded-md transition duration-200"
+                      >
+                        +
+                      </button>
+                    </div>
+                  </div>
+                  <div className="flex flex-col items-end space-y-2">
+                    <p className="text-lg font-semibold text-gray-800">รวม: ฿{(item.price * item.quantity).toFixed(2)}</p>
+                    <button
+                      onClick={() => removeFromCart(item._id)}
+                      className="text-red-500 hover:text-red-700 font-medium transition duration-200"
+                    >
+                      ลบ
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
 
-      <div className="mt-6 text-right text-lg font-semibold">
-        ราคารวม: ฿{totalPrice}
-      </div>
-
-      <div className="mt-4 text-right">
-        <Link
-          to="/checkout"
-          className="bg-green-500 text-white px-4 py-2 rounded"
-        >
-          ดำเนินการสั่งซื้อ
-        </Link>
+            <div className="mt-8 pt-6 border-t-2 border-gray-200 flex flex-col sm:flex-row justify-between items-center">
+              <p className="text-2xl font-bold text-gray-800 mb-4 sm:mb-0">ราคารวม: <span className="text-indigo-600">฿{totalPrice.toFixed(2)}</span></p>
+              <Link
+                to="/checkout"
+                className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300 ease-in-out transform hover:scale-105"
+              >
+                ดำเนินการชำระเงิน
+              </Link>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
