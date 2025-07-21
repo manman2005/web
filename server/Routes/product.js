@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { read, list, create, update, remove } = require('../Controllers/product');
+const { read, list, create, update, remove, listByCategory } = require('../Controllers/product');
 const { auth } = require('../Middleware/auth');
 const { adminCheck } = require('../Middleware/admin');
 const multer = require('multer');
@@ -31,6 +31,9 @@ router.get('/', list);
 
 // GET /api/products/:id (public)
 router.get('/:id', read);
+
+// GET /api/products/category/:categoryName (public)
+router.get('/category/:categoryName', listByCategory);
 
 // POST /api/products (protected, admin only)
 router.post('/', auth, adminCheck, upload.array('images', 5), create);

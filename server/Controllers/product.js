@@ -54,6 +54,23 @@ exports.list = async (req, res) => {
         res.status(500).send('server error');
     }
 }
+
+exports.listByCategory = async (req, res) => {
+    try {
+        const categoryName = req.params.categoryName;
+        const products = await product.find({ category: categoryName }).exec();
+        const LOW_STOCK_THRESHOLD = 10; // กำหนดเกณฑ์สินค้าใกล้หมด
+        const productsWithAlert = products.map(p => ({
+            ...p.toObject(),
+            lowStockAlert: p.quantity !== undefined && p.quantity < LOW_STOCK_THRESHOLD
+        }));
+        res.json(productsWithAlert);
+    } catch (err) {
+        console.log(err);
+        res.status(500).send('server error');
+    }
+}
+
 exports.create = async (req, res) => {
   try {
     let { name, detail, price, category, brand, quantity } = req.body;
