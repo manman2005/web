@@ -12,7 +12,7 @@ export const CartProvider = ({ children }) => {
         i._id === item._id ? { ...i, quantity: i.quantity + quantity } : i
       ));
     } else {
-      setCartItems([...cartItems, { ...item, quantity: quantity }]);
+      setCartItems([...cartItems, { ...item, quantity: quantity, image: item.images && item.images.length > 0 ? item.images[0].url : '' }]);
     }
   };
 

@@ -47,13 +47,16 @@ const Cart = () => {
       <div className="space-y-4">
         {cartItems.map(item => (
           <div key={item._id} className="flex flex-col sm:flex-row sm:justify-between sm:items-center border-b pb-2">
-            <div className="w-full">
-              <p className="font-semibold">{item.name}</p>
-              <p>ราคา: ฿{item.price}</p>
-              <div className="flex gap-2 mt-1">
-                <button onClick={() => decreaseQty(item._id)} className="px-2 bg-gray-200 rounded">−</button>
-                <span>{item.quantity}</span>
-                <button onClick={() => increaseQty(item._id)} className="px-2 bg-gray-200 rounded">+</button>
+            <div className="flex items-center">
+              <img src={`http://localhost:5000${item.image}`} alt={item.name} className="w-16 h-16 object-cover rounded-md mr-4" />
+              <div className="w-full">
+                <p className="font-semibold">{item.name}</p>
+                <p>ราคา: ฿{item.price}</p>
+                <div className="flex gap-2 mt-1">
+                  <button onClick={() => decreaseQty(item._id)} className="px-2 bg-gray-200 rounded">−</button>
+                  <span>{item.quantity}</span>
+                  <button onClick={() => increaseQty(item._id)} className="px-2 bg-gray-200 rounded">+</button>
+                </div>
               </div>
             </div>
             <div className="w-full sm:w-auto text-left sm:text-right mt-2 sm:mt-0">
