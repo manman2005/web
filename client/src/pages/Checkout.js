@@ -8,7 +8,7 @@ import { toast } from 'react-toastify';
 
 const Checkout = () => {
   const navigate = useNavigate();
-  const { cartItems, totalPrice, clearCart } = useContext(CartContext);
+  const { cartItems, totalPrice, clearCart, selectedCartItems, clearSelectedItems } = useContext(CartContext);
   const { isAuthenticated, user } = useContext(AuthContext);
 
   const [shippingAddress, setShippingAddress] = useState('');
@@ -43,6 +43,11 @@ const Checkout = () => {
       return;
     }
 
+    if (selectedCartItems.length === 0) {
+      alert('กรุณาเลือกสินค้าที่ต้องการสั่งซื้อ');
+      return;
+    }
+
     try {
       const token = getToken();
 
@@ -66,7 +71,7 @@ const Checkout = () => {
       const response = await axios.post(
         'http://localhost:5000/api/',
         {
-          cart: cartItems.map(item => ({
+          cart: selectedCartItems.map(item => ({
             product: item._id,
             count: item.quantity,
             price: item.price
@@ -80,7 +85,7 @@ const Checkout = () => {
         }
       );
       toast.success('สั่งซื้อเรียบร้อยแล้ว!');
-      clearCart(); // Clear cart after successful order
+      clearSelectedItems(); // Clear only selected items after successful order
       navigate('/'); // Navigate to home page
     } catch (error) {
       console.error('Error during checkout:', error);
@@ -97,11 +102,11 @@ const Checkout = () => {
           {/* Order Summary Section */}
           <div className="bg-gray-50 p-6 rounded-lg shadow-inner">
             <h3 className="text-2xl font-semibold text-gray-700 mb-4">สรุปรายการสั่งซื้อ</h3>
-            {cartItems.length === 0 ? (
-              <p className="text-gray-600">ไม่มีสินค้าในตะกร้า</p>
+            {selectedCartItems.length === 0 ? (
+              <p className="text-gray-600">ไม่มีสินค้าที่เลือกในตะกร้า</p>
             ) : (
               <div className="space-y-4">
-                {cartItems.map(item => (
+                {selectedCartItems.map(item => (
                   <div key={item._id} className="flex justify-between items-center border-b border-gray-200 pb-2">
                     <span className="text-gray-700 text-lg">{item.name} x {item.quantity}</span>
                     <span className="text-gray-800 font-medium text-lg">฿{(item.price * item.quantity).toFixed(2)}</span>

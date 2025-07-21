@@ -30,7 +30,8 @@ export const CartProvider = ({ children }) => {
         price: item.price,
         image: item.images && item.images.length > 0 ? item.images[0].url : '',
         stock: item.quantity,
-        quantity: quantity
+        quantity: quantity,
+        isSelected: true // Add isSelected property
       };
       setCartItems([...cartItems, newItem]);
     }
@@ -61,12 +62,24 @@ export const CartProvider = ({ children }) => {
     ));
   };
 
-  const totalPrice = cartItems.reduce(
+  const toggleItemSelection = (id) => {
+    setCartItems(cartItems.map(item =>
+      item._id === id ? { ...item, isSelected: !item.isSelected } : item
+    ));
+  };
+
+  const selectedCartItems = cartItems.filter(item => item.isSelected);
+
+  const totalPrice = selectedCartItems.reduce(
     (sum, item) => sum + item.price * item.quantity, 0
   );
 
   const clearCart = () => {
     setCartItems([]);
+  };
+
+  const clearSelectedItems = () => {
+    setCartItems(cartItems.filter(item => !item.isSelected));
   };
 
   return (
@@ -76,8 +89,11 @@ export const CartProvider = ({ children }) => {
       removeFromCart,
       increaseQty,
       decreaseQty,
+      toggleItemSelection,
+      selectedCartItems,
       totalPrice,
       clearCart,
+      clearSelectedItems,
     }}>
       {children}
     </CartContext.Provider>

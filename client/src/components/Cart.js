@@ -4,7 +4,7 @@ import { AuthContext } from '../context/AuthContext';
 import { Link } from 'react-router-dom';
 
 const Cart = () => {
-  const { cartItems, removeFromCart, increaseQty, decreaseQty, totalPrice } = useContext(CartContext);
+  const { cartItems, removeFromCart, increaseQty, decreaseQty, totalPrice, toggleItemSelection, selectedCartItems } = useContext(CartContext);
   const { isAuthenticated } = useContext(AuthContext);
 
   if (!isAuthenticated) {
@@ -60,11 +60,18 @@ const Cart = () => {
           <>
             <div className="space-y-6">
               {cartItems.map(item => (
-                <div key={item._id} className="flex flex-col sm:flex-row items-center bg-gray-50 p-4 rounded-lg shadow-sm space-y-4 sm:space-y-0 sm:space-x-4">
-                  <img src={`http://localhost:5000${item.image}`} alt={item.name} className="w-24 h-24 object-cover rounded-md flex-shrink-0" />
+                <div key={item._id} className="flex flex-col md:flex-row items-center bg-gray-50 p-4 rounded-lg shadow-sm space-y-4 md:space-y-0 md:space-x-4">
+                  <input
+                    type="checkbox"
+                    checked={item.isSelected}
+                    onChange={() => toggleItemSelection(item._id)}
+                    className="form-checkbox h-5 w-5 text-indigo-600"
+                  />
+                  <img src={`http://localhost:5000${item.image}`} alt={item.name} className="w-20 h-20 sm:w-24 sm:h-24 object-cover rounded-md flex-shrink-0" />
                   <div className="flex-grow">
                     <p className="font-semibold text-lg text-gray-800">{item.name}</p>
-                    <p className="text-gray-600">ราคา: ฿{item.price.toFixed(2)}</p>
+                    <p className="text-gray-600 text-base">ราคา: ฿{item.price.toFixed(2)}</p>
+                    <p className="text-gray-500 text-sm">สต็อก: {item.stock} ชิ้น</p>
                     <div className="flex items-center space-x-2 mt-2">
                       <button
                         onClick={() => decreaseQty(item._id)}
@@ -81,7 +88,7 @@ const Cart = () => {
                       </button>
                     </div>
                   </div>
-                  <div className="flex flex-col items-end space-y-2">
+                  <div className="flex flex-col items-end space-y-2 mt-4 md:mt-0">
                     <p className="text-lg font-semibold text-gray-800">รวม: ฿{(item.price * item.quantity).toFixed(2)}</p>
                     <button
                       onClick={() => removeFromCart(item._id)}
@@ -98,7 +105,8 @@ const Cart = () => {
               <p className="text-2xl font-bold text-gray-800 mb-4 sm:mb-0">ราคารวม: <span className="text-indigo-600">฿{totalPrice.toFixed(2)}</span></p>
               <Link
                 to="/checkout"
-                className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300 ease-in-out transform hover:scale-105"
+                className={`bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300 ease-in-out transform hover:scale-105 ${selectedCartItems.length === 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
+                onClick={(e) => selectedCartItems.length === 0 && e.preventDefault()}
               >
                 ดำเนินการชำระเงิน
               </Link>
