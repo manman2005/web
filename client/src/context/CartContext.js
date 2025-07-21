@@ -7,12 +7,30 @@ export const CartProvider = ({ children }) => {
 
   const addToCart = (item, quantity = 1) => {
     const exists = cartItems.find(i => i._id === item._id);
+
     if (exists) {
+      const newQuantity = exists.quantity + quantity;
+      if (newQuantity > exists.stock) {
+        alert(`ไม่สามารถเพิ่มสินค้าเกินจำนวนในสต็อกได้ (มีอยู่ ${exists.stock} ชิ้นในสต็อก และ ${exists.quantity} ในตะกร้าแล้ว)`);
+        return;
+      }
       setCartItems(cartItems.map(i =>
-        i._id === item._id ? { ...i, quantity: i.quantity + quantity } : i
+        i._id === item._id ? { ...i, quantity: newQuantity } : i
       ));
     } else {
-      setCartItems([...cartItems, { ...item, quantity: quantity, image: item.images && item.images.length > 0 ? item.images[0].url : '' }]);
+      if (quantity > item.quantity) {
+        alert(`ไม่สามารถเพิ่มสินค้าเกินจำนวนในสต็อกได้ (มีอยู่ ${item.quantity} ชิ้น)`);
+        return;
+      }
+      const newItem = {
+        _id: item._id,
+        name: item.name,
+        price: item.price,
+        image: item.images && item.images.length > 0 ? item.images[0].url : '',
+        stock: item.quantity,
+        quantity: quantity
+      };
+      setCartItems([...cartItems, newItem]);
     }
   };
 
@@ -21,9 +39,16 @@ export const CartProvider = ({ children }) => {
   };
 
   const increaseQty = (id) => {
-    setCartItems(cartItems.map(i =>
-      i._id === id ? { ...i, quantity: i.quantity + 1 } : i
-    ));
+    setCartItems(cartItems.map(i => {
+      if (i._id === id) {
+        if (i.quantity >= i.stock) {
+          alert(`สินค้ามีในสต็อกเพียง ${i.stock} ชิ้น`);
+          return i;
+        }
+        return { ...i, quantity: i.quantity + 1 };
+      }
+      return i;
+    }));
   };
 
   const decreaseQty = (id) => {
@@ -56,4 +81,3 @@ export const CartProvider = ({ children }) => {
     </CartContext.Provider>
   );
 };
-    
