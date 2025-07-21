@@ -65,7 +65,7 @@ const ProductDetail = () => {
       return;
     }
     if (product && quantity > 0) {
-      addToCart({ ...product, quantity });
+      addToCart(product, quantity);
       alert('เพิ่มสินค้าลงในตะกร้าแล้ว!');
     }
   };

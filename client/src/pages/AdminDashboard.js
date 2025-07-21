@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { getToken } from '../auth/authUtils';
 import { Link } from 'react-router-dom';
-import { FiUsers, FiShoppingCart, FiEdit, FiPlusCircle, FiXCircle, FiBox, FiHome, FiBarChart2 } from 'react-icons/fi';
+import { FiUsers, FiShoppingCart, FiEdit, FiPlusCircle, FiXCircle, FiBox, FiHome, FiBarChart2, FiAlertTriangle } from 'react-icons/fi';
 import { Line } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -504,7 +504,7 @@ const AdminDashboard = () => {
 
         {/* Content based on activeTab */}
         {activeTab === 'overview' && (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             <div className="bg-white rounded-lg shadow-lg p-6 text-center">
               <FiUsers className="text-indigo-500 text-4xl mx-auto mb-3" />
               <h3 className="text-xl font-semibold text-gray-700">Total Users</h3>
@@ -519,6 +519,11 @@ const AdminDashboard = () => {
               <FiShoppingCart className="text-yellow-500 text-4xl mx-auto mb-3" />
               <h3 className="text-xl font-semibold text-gray-700">Total Orders</h3>
               <p className="text-4xl font-bold text-gray-900">{orders.length}</p>
+            </div>
+            <div className="bg-white rounded-lg shadow-lg p-6 text-center">
+                <FiAlertTriangle className="text-red-500 text-4xl mx-auto mb-3" />
+                <h3 className="text-xl font-semibold text-gray-700">Low Stock</h3>
+                <p className="text-4xl font-bold text-gray-900">{products.filter(p => p.lowStockAlert).length}</p>
             </div>
           </div>
         )}
@@ -628,6 +633,7 @@ const AdminDashboard = () => {
                     <th scope="col" className="px-3 py-2 sm:px-6 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Brand</th>
                     <th scope="col" className="px-3 py-2 sm:px-6 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
                     <th scope="col" className="px-3 py-2 sm:px-6 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quantity</th>
+                    <th scope="col" className="px-3 py-2 sm:px-6 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                     <th scope="col" className="relative px-3 py-2 sm:px-6 sm:py-3"><span className="sr-only">Edit</span></th>
                   </tr>
                 </thead>
@@ -643,6 +649,13 @@ const AdminDashboard = () => {
                       <td className="px-3 py-2 sm:px-6 sm:py-4 whitespace-nowrap text-sm text-gray-500">{product.brand}</td>
                       <td className="px-3 py-2 sm:px-6 sm:py-4 whitespace-nowrap text-sm text-gray-500">฿{product.price}</td>
                       <td className="px-3 py-2 sm:px-6 sm:py-4 whitespace-nowrap text-sm text-gray-500">{product.quantity}</td>
+                      <td className="px-3 py-2 sm:px-6 sm:py-4 whitespace-nowrap text-sm text-gray-500">
+                        {product.lowStockAlert && (
+                          <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                            สินค้าใกล้หมด
+                          </span>
+                        )}
+                      </td>
                       <td className="px-3 py-2 sm:px-6 sm:py-4 whitespace-nowrap text-right text-sm font-medium flex justify-end items-center gap-2">
                         <button onClick={() => handleEditProduct(product)} className="text-indigo-600 hover:text-indigo-900 flex items-center gap-1">
                           <FiEdit /> Edit
